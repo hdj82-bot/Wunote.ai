@@ -98,3 +98,82 @@ export interface CorpusUploadResponse {
   charLength: number
   isPublic: boolean
 }
+
+// ============================================================
+// 단어장 / 북마크 / 퀴즈 — Phase 2 sprint 1
+// ============================================================
+
+export interface VocabItem {
+  id: string
+  student_id: string
+  chinese: string
+  pinyin: string | null
+  korean: string | null
+  source_error_id: string | null
+  review_count: number
+  next_review_at: string | null
+  created_at: string
+}
+
+export interface VocabCreateInput {
+  chinese: string
+  pinyin?: string
+  korean?: string
+  source_error_id?: string
+}
+
+export interface BookmarkItem {
+  id: string
+  student_id: string
+  error_card_id: string | null
+  sentence: string
+  note: string | null
+  created_at: string
+}
+
+export interface BookmarkCreateInput {
+  sentence: string
+  note?: string
+  error_card_id?: string
+}
+
+export interface QuizQuestion {
+  /** 이 문제의 근거가 된 error_card id. 정답 제출 시 이 id 로 quiz_results 에 기록된다. */
+  error_card_id: string
+  error_subtype: string | null
+  /** 문제 지문(한국어 설명 + 중국어 빈칸). */
+  question: string
+  /** 정확히 5개의 선택지. correct_index 로 정답 위치를 표시한다. */
+  options: string[]
+  correct_index: number
+  explanation: string
+}
+
+export interface QuizGenerateResponse {
+  questions: QuizQuestion[]
+}
+
+export interface QuizAnswerRequest {
+  error_card_id: string
+  is_correct: boolean
+}
+
+export interface QuizAnswerResponse {
+  recorded: boolean
+  xp_awarded: number
+  level: number
+  xp: number
+  level_up: boolean
+}
+
+// ============================================================
+// 게이미피케이션 스냅샷 — 클라이언트에 내려줄 집계
+// ============================================================
+
+export interface GamificationSnapshot {
+  level: number
+  xp: number
+  streak_days: number
+  last_active_date: string | null
+  next_level_xp: number | null
+}
