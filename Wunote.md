@@ -18,7 +18,7 @@
 | 스타일 | Tailwind CSS | 반응형 필수 |
 | 인증 | Supabase Auth | 이메일/역할 구분 |
 | DB | Supabase (PostgreSQL) | 실시간 구독 포함 |
-| AI | Claude API (claude-sonnet-4-6) | 오류 분석·리포트·채팅 |
+| AI | Claude API (claude-opus-4-7) | 오류 분석·리포트·채팅 |
 | 배포 | Vercel | 자동 CI/CD |
 | 이메일 | Resend | 주간 카드뉴스 발송 |
 | 푸시 알림 | Web Push API (PWA) | next-pwa 라이브러리 |
