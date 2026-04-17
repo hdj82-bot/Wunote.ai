@@ -26,6 +26,10 @@ export interface AnalysisResponse {
   errors: AnalysisError[]
   overall_feedback: string
   fluency_suggestion?: string
+  /** 세션·오류 카드 영속화 시 발급되는 세션 PK (UUID). */
+  session_id?: string
+  /** 이번 제출로 화석화 임계(3회+)에 도달한 error_subtype 경고 목록. */
+  fossilization_warnings?: FossilizationWarning[]
 }
 
 export interface IclExample {
@@ -85,4 +89,12 @@ export interface CorpusParseResult {
   fileType: CorpusFileType
   byteLength: number
   charLength: number
+}
+
+export interface CorpusUploadResponse {
+  id: string
+  fileName: string
+  fileType: CorpusFileType
+  charLength: number
+  isPublic: boolean
 }
