@@ -2,19 +2,40 @@ import type { FossilizationWarning, RemedialContent, RemedialQuiz } from '@/type
 import { completeJSON } from './claude'
 import { buildSystemPrompt } from './prompts/base'
 import { extractFirstJsonObject } from './parser'
+import { createServerClient } from './supabase'
 
 /** 동일 error_subtype 반복 임계치 */
 export const FOSSILIZATION_THRESHOLD = 3
 
 /**
  * 학습자가 특정 error_subtype 을 과거에 몇 번 기록했는지 돌려주는 fetcher.
- * Supabase 접근은 창3 소유(lib/supabase.ts) 이므로, 이 모듈은 의존성을 주입받아
- * 순수 로직만 담당한다. 호출 측에서 lib/supabase.ts 의 헬퍼로 값을 조회한 뒤 전달한다.
+ * 테스트·대체 구현이 가능하도록 DI 형태를 유지하되, 기본 구현(createDbFetcher)은
+ * lib/supabase.ts 의 createServerClient 를 사용해 error_cards COUNT 쿼리를 수행한다.
  */
 export type SubtypeHistoryFetcher = (
   studentId: string,
   errorSubtype: string
 ) => Promise<number>
+
+/**
+ * Supabase 기반 기본 fetcher. Route Handler / Server Action 컨텍스트에서 사용한다.
+ * RLS 에 따라 본인(student)만 자신의 error_cards 를 조회한다.
+ */
+export function createDbFetcher(): SubtypeHistoryFetcher {
+  const supabase = createServerClient()
+  return async (studentId: string, errorSubtype: string) => {
+    const { count, error } = await supabase
+      .from('error_cards')
+      .select('id', { count: 'exact', head: true })
+      .eq('student_id', studentId)
+      .eq('error_subtype', errorSubtype)
+
+    if (error) {
+      throw new Error(`error_cards COUNT 실패: ${error.message}`)
+    }
+    return count ?? 0
+  }
+}
 
 export async function checkFossilization(
   studentId: string,

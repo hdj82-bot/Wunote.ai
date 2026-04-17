@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { streamText } from '@/lib/claude'
 import { buildTutorSystemPrompt } from '@/lib/prompts/tutor'
+import { requireAuth, AuthError } from '@/lib/auth'
 import type { ChatRequest, ChatMessage } from '@/types'
 
 export const runtime = 'nodejs'
@@ -32,6 +33,15 @@ function errorResponse(message: string, status: number): Response {
 }
 
 export async function POST(req: Request) {
+  try {
+    await requireAuth()
+  } catch (err) {
+    if (err instanceof AuthError) {
+      return errorResponse(err.message, err.status)
+    }
+    return errorResponse('인증 확인 중 오류가 발생했습니다', 500)
+  }
+
   let body: Partial<ChatRequest>
   try {
     body = (await req.json()) as Partial<ChatRequest>

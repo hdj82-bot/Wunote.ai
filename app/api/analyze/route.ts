@@ -1,17 +1,25 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { analyzeDraft } from '@/lib/analysis'
-import type { AnalyzeRequest } from '@/types'
+import { requireAuth, AuthError } from '@/lib/auth'
+import { createSession } from '@/lib/sessions'
+import { saveErrorCards } from '@/lib/error-cards'
+import { FOSSILIZATION_THRESHOLD } from '@/lib/fossilization'
+import type { AnalyzeRequest, AnalysisResponse, FossilizationWarning } from '@/types'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
 const MAX_DRAFT_LENGTH = 8000
 
+interface AnalyzeBody extends Omit<AnalyzeRequest, 'studentId'> {
+  /** studentId 는 서버에서 세션 사용자로 덮어쓰므로 클라이언트 값은 무시한다. */
+}
+
 export async function POST(req: Request) {
-  let body: Partial<AnalyzeRequest>
+  let body: Partial<AnalyzeBody>
   try {
-    body = (await req.json()) as Partial<AnalyzeRequest>
+    body = (await req.json()) as Partial<AnalyzeBody>
   } catch {
     return NextResponse.json({ error: '잘못된 JSON 요청입니다' }, { status: 400 })
   }
@@ -29,10 +37,15 @@ export async function POST(req: Request) {
   if (typeof body.chapterNumber !== 'number' || !Number.isFinite(body.chapterNumber)) {
     return NextResponse.json({ error: 'chapterNumber 는 숫자여야 합니다' }, { status: 400 })
   }
+  if (!body.classId || typeof body.classId !== 'string') {
+    return NextResponse.json({ error: 'classId 는 필수입니다' }, { status: 400 })
+  }
 
   try {
+    const auth = await requireAuth('student')
+
     const analysis = await analyzeDraft({
-      studentId: body.studentId ?? 'anonymous',
+      studentId: auth.userId,
       classId: body.classId,
       chapterNumber: body.chapterNumber,
       draftText,
@@ -40,8 +53,46 @@ export async function POST(req: Request) {
       iclExamples: body.iclExamples,
       chapterFocus: body.chapterFocus
     })
-    return NextResponse.json(analysis)
+
+    // 영속화 — 세션 → 오류 카드. 하나라도 실패하면 500 으로 노출한다.
+    const sessionId = await createSession({
+      studentId: auth.userId,
+      classId: body.classId,
+      chapterNumber: body.chapterNumber,
+      draftText,
+      draftErrorCount: analysis.error_count
+    })
+
+    const { subtypeCounts } = await saveErrorCards(
+      sessionId,
+      auth.userId,
+      body.chapterNumber,
+      analysis.errors
+    )
+
+    // 이번 제출로 임계치 도달 subtype 만 경고로 반환.
+    const fossilization_warnings: FossilizationWarning[] = []
+    for (const [subtype, count] of subtypeCounts) {
+      if (count >= FOSSILIZATION_THRESHOLD) {
+        fossilization_warnings.push({
+          isFossilized: true,
+          errorSubtype: subtype,
+          count,
+          warningMessage: `'${subtype}' 오류가 ${count}회 반복되고 있습니다. 화석화 위험이 있어요.`
+        })
+      }
+    }
+
+    const response: AnalysisResponse = {
+      ...analysis,
+      session_id: sessionId,
+      fossilization_warnings: fossilization_warnings.length > 0 ? fossilization_warnings : undefined
+    }
+    return NextResponse.json(response)
   } catch (err) {
+    if (err instanceof AuthError) {
+      return NextResponse.json({ error: err.message }, { status: err.status })
+    }
     console.error('[api/analyze] error:', err)
     if (err instanceof Anthropic.RateLimitError) {
       return NextResponse.json(
