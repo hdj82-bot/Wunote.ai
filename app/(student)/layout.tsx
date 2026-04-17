@@ -26,6 +26,9 @@ async function loadStats(): Promise<GameStats | null> {
 const NAV = [
   { href: "/learn/1", label: "학습" },
   { href: "/errors", label: "오류 기록" },
+  { href: "/vocabulary", label: "단어장" },
+  { href: "/bookmarks", label: "북마크" },
+  { href: "/progress", label: "리포트" },
   { href: "/badges", label: "배지" },
 ];
 

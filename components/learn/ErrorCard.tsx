@@ -4,9 +4,14 @@ import type { AnalysisError } from "@/types";
 
 interface Props {
   error: AnalysisError;
+  errorCardId?: string;
   fossilizationCount?: number;
   isFocused?: boolean;
   onFocus?: () => void;
+  onBookmark?: (errorCardId: string) => void | Promise<void>;
+  onAddVocab?: (errorCardId: string) => void | Promise<void>;
+  isBookmarked?: boolean;
+  isInVocab?: boolean;
 }
 
 const TYPE_LABEL: Record<AnalysisError["error_type"], string> = {
@@ -14,9 +19,20 @@ const TYPE_LABEL: Record<AnalysisError["error_type"], string> = {
   grammar: "문법",
 };
 
-export default function ErrorCard({ error, fossilizationCount, isFocused, onFocus }: Props) {
+export default function ErrorCard({
+  error,
+  errorCardId,
+  fossilizationCount,
+  isFocused,
+  onFocus,
+  onBookmark,
+  onAddVocab,
+  isBookmarked,
+  isInVocab,
+}: Props) {
   const [cotOpen, setCotOpen] = useState(false);
   const isFossilized = (fossilizationCount ?? 0) >= 3;
+  const showActions = Boolean(errorCardId && (onBookmark || onAddVocab));
 
   return (
     <article
@@ -81,6 +97,37 @@ export default function ErrorCard({ error, fossilizationCount, isFocused, onFocu
       {error.similar_example && (
         <div className="border-t bg-slate-50 px-3 py-2 text-xs text-slate-600">
           유사 예시 <span className="ml-2 text-slate-800">{error.similar_example}</span>
+        </div>
+      )}
+
+      {showActions && errorCardId && (
+        <div className="flex gap-2 border-t px-3 py-2">
+          {onBookmark && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onBookmark(errorCardId);
+              }}
+              disabled={isBookmarked}
+              className="rounded border border-slate-300 px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              {isBookmarked ? "북마크됨 ⭐" : "북마크 ☆"}
+            </button>
+          )}
+          {onAddVocab && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddVocab(errorCardId);
+              }}
+              disabled={isInVocab}
+              className="rounded border border-slate-300 px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              {isInVocab ? "단어장 추가됨" : "단어장 추가 +"}
+            </button>
+          )}
         </div>
       )}
     </article>
