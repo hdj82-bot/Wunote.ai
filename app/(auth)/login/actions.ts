@@ -32,6 +32,7 @@ export async function login(
     .from('profiles')
     .select('role')
     .eq('id', data.user.id)
+    .returns<Array<{ role: 'professor' | 'student' }>>()
     .single()
 
   redirect(profile?.role === 'professor' ? '/dashboard' : '/learn')
