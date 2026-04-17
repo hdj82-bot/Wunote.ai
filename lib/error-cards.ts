@@ -66,7 +66,7 @@ export async function saveErrorCards(
     }
   })
 
-  // `as never` — types/database.ts 가 placeholder 인 동안 Insert 타입이 never 로 추론된다.
+  // TODO(deps): ssr/supabase-js 타입 경로 미스매치 해소 후 as never 제거. (lib/sessions.ts 주석 참조)
   const { error: insertErr } = await supabase.from('error_cards').insert(rows as never)
   if (insertErr) {
     throw new Error(`error_cards insert 실패: ${insertErr.message}`)

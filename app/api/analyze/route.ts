@@ -5,7 +5,8 @@ import { requireAuth, AuthError } from '@/lib/auth'
 import { createSession } from '@/lib/sessions'
 import { saveErrorCards } from '@/lib/error-cards'
 import { FOSSILIZATION_THRESHOLD } from '@/lib/fossilization'
-import type { AnalyzeRequest, AnalysisResponse, FossilizationWarning } from '@/types'
+import { getChapterConfig } from '@/lib/prompts'
+import type { AnalyzeRequest, AnalysisResponse, FossilizationWarning, IclExample } from '@/types'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -44,14 +45,25 @@ export async function POST(req: Request) {
   try {
     const auth = await requireAuth('student')
 
+    // 챕터 전용 프롬프트(ICL + 포커스) 자동 주입.
+    // 요청 바디의 chapterFocus / iclExamples 는 수업별 오버라이드로 간주하여 앞에 우선 배치한다.
+    const chapterCfg = getChapterConfig(body.chapterNumber)
+    const mergedFocus = [body.chapterFocus?.trim(), chapterCfg?.chapterFocus]
+      .filter((s): s is string => !!s && s.length > 0)
+      .join('\n\n')
+    const mergedIcl: IclExample[] = [
+      ...(body.iclExamples ?? []),
+      ...(chapterCfg?.iclExamples ?? [])
+    ]
+
     const analysis = await analyzeDraft({
       studentId: auth.userId,
       classId: body.classId,
       chapterNumber: body.chapterNumber,
       draftText,
       corpus: body.corpus,
-      iclExamples: body.iclExamples,
-      chapterFocus: body.chapterFocus
+      iclExamples: mergedIcl.length > 0 ? mergedIcl : undefined,
+      chapterFocus: mergedFocus || undefined
     })
 
     // 영속화 — 세션 → 오류 카드. 하나라도 실패하면 500 으로 노출한다.

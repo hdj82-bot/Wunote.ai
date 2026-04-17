@@ -22,8 +22,9 @@ export async function createSession(params: CreateSessionParams): Promise<string
 
   const supabase = createServerClient()
 
-  // `as never` — types/database.ts 가 아직 placeholder 이라서 supabase-js 가 Insert 타입을
-  // never 로 추론한다. 창3 의 supabase gen types 반영되면 제거할 수 있다.
+  // TODO(deps): @supabase/ssr 0.5.2 가 @supabase/supabase-js/dist/module/lib/types 경로에서
+  // GenericSchema 를 import 하는데, supabase-js 2.103+ 에서 해당 경로가 사라져 Insert 페이로드가
+  // never 로 추론된다. ssr 버전을 supabase-js 와 호환되는 것으로 올리면 as never 를 제거할 수 있다.
   const { data, error } = await supabase
     .from('sessions')
     .insert({
