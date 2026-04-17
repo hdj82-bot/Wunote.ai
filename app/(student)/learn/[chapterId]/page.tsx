@@ -46,7 +46,7 @@ export default function LearnPage({ params }: { params: { chapterId: string } })
     analysis?.errors.find((e) => e.id === focusedErrorId) ?? null;
 
   return (
-    <div className="flex h-dvh flex-col bg-slate-100">
+    <div className="flex min-h-0 flex-1 flex-col bg-slate-100">
       <header className="flex items-center justify-between border-b bg-white px-4 py-2">
         <h1 className="text-sm font-semibold text-slate-700">
           제{params.chapterId}장
