@@ -682,6 +682,15 @@ export type Database = {
       owns_class: { Args: { p_class_id: string }; Returns: boolean }
       owns_session_class: { Args: { p_session_id: string }; Returns: boolean }
       corpus_class_id: { Args: { p_name: string }; Returns: string | null }
+      compute_level: { Args: { p_xp: number }; Returns: number }
+      add_xp: {
+        Args: { p_student_id: string; p_delta: number }
+        Returns: { new_level: number; new_xp: number; leveled_up: boolean }[]
+      }
+      touch_streak: {
+        Args: { p_student_id: string }
+        Returns: { streak_days: number; extended: boolean; was_reset: boolean }[]
+      }
     }
     Enums: {
       [_ in never]: never
