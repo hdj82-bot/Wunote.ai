@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { signup, type SignupState } from "./actions";
+import { createBrowserClient } from "@/lib/supabase";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
@@ -94,6 +95,29 @@ export default function SignupForm() {
       )}
 
       <SubmitButton />
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-slate-200" />
+        </div>
+        <div className="relative flex justify-center text-xs text-slate-400">
+          <span className="bg-white px-2">또는</span>
+        </div>
+      </div>
+
+      <Button
+        type="button"
+        variant="secondary"
+        className="w-full"
+        onClick={() =>
+          createBrowserClient().auth.signInWithOAuth({
+            provider: "google",
+            options: { redirectTo: `${window.location.origin}/api/auth/callback` },
+          })
+        }
+      >
+        Google로 로그인
+      </Button>
     </form>
   );
 }
