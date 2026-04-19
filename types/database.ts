@@ -672,6 +672,30 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          id: string
+          student_id: string
+          endpoint: string
+          subscription: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          endpoint: string
+          subscription: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          endpoint?: string
+          subscription?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
