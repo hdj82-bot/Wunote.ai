@@ -33,6 +33,11 @@ function hasPrefix(pathname: string, prefixes: string[]) {
 }
 
 export async function middleware(request: NextRequest) {
+  // LMS API routes use API key auth — skip session middleware entirely.
+  if (request.nextUrl.pathname.startsWith('/api/lms/')) {
+    return NextResponse.next()
+  }
+
   let response = NextResponse.next({ request })
 
   const supabase = createServerClient<Database>(
