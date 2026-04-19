@@ -32,6 +32,8 @@ const NAV = [
   { href: "/cardnews", label: "카드뉴스" },
   { href: "/assignments", label: "과제" },
   { href: "/badges", label: "배지" },
+  { href: "/goals", label: "목표" },
+  { href: "/translate", label: "번역" },
 ];
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
