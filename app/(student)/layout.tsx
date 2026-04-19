@@ -30,6 +30,8 @@ const NAV = [
   { href: "/bookmarks", label: "북마크" },
   { href: "/progress", label: "리포트" },
   { href: "/badges", label: "배지" },
+  { href: "/goals", label: "목표" },
+  { href: "/translate", label: "번역" },
 ];
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
