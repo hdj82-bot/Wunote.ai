@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import OfflineIndicator from "@/components/OfflineIndicator";
 
 export const metadata: Metadata = {
   title: "Wunote",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        {children}
+        <OfflineIndicator />
+      </body>
     </html>
   );
 }
