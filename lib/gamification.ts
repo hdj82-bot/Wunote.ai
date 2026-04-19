@@ -1,4 +1,5 @@
-import { createServerClient } from './supabase'
+import { createServerClient, createAdminClient } from './supabase'
+import { notifyKakaoEvent } from './kakao'
 import type { GamificationSnapshot } from '@/types'
 
 // XP 획득 기준 (Wunote.md) — 한 곳에서 관리
@@ -91,6 +92,11 @@ export async function addXp(studentId: string, amount: number): Promise<AddXpRes
 
   if (error) {
     throw new Error(`gamification_stats update 실패: ${error.message}`)
+  }
+
+  if (levelUp) {
+    const admin = createAdminClient()
+    notifyKakaoEvent(admin, studentId, 'badge_earned', `레벨 ${newLevel}`).catch(() => {})
   }
 
   return { level: newLevel, xp: newXp, levelUp }

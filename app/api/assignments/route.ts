@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { requireAuth, AuthError } from '@/lib/auth'
-import { createServerClient } from '@/lib/supabase'
+import { createServerClient, createAdminClient } from '@/lib/supabase'
 import {
   createAssignment,
   listAssignmentsForClass,
   listAssignmentsForStudent
 } from '@/lib/assignments'
+import { notifyKakaoEvent } from '@/lib/kakao'
 import type { AssignmentCreateInput } from '@/types/assignments'
 
 export const runtime = 'nodejs'
@@ -119,6 +120,18 @@ export async function POST(req: Request) {
 
   try {
     const assignment = await createAssignment(auth.userId, parsed)
+
+    const admin = createAdminClient()
+    admin.from('enrollments')
+      .select('student_id')
+      .eq('class_id', parsed.class_id)
+      .then(({ data }) => {
+        data?.forEach(row =>
+          notifyKakaoEvent(admin, row.student_id, 'assignment_created', parsed.title)
+            .catch(() => {})
+        )
+      })
+
     return NextResponse.json({ assignment }, { status: 201 })
   } catch (err) {
     console.error('[api/assignments POST]', err)
