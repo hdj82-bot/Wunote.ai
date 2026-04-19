@@ -34,6 +34,11 @@ const NAV = [
   { href: "/badges", label: "배지" },
   { href: "/goals", label: "목표" },
   { href: "/translate", label: "번역" },
+  { href: "/portfolio",     label: "포트폴리오" },
+  { href: "/peer-review",   label: "피어 리뷰" },
+  { href: "/pronunciation", label: "발음 연습" },
+  { href: "/notifications", label: "알림 설정" },
+  { href: "/data-export",   label: "내 데이터" },
 ];
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
