@@ -29,6 +29,7 @@ const NAV = [
   { href: "/vocabulary", label: "단어장" },
   { href: "/bookmarks", label: "북마크" },
   { href: "/progress", label: "리포트" },
+  { href: "/cardnews", label: "카드뉴스" },
   { href: "/badges", label: "배지" },
 ];
 
