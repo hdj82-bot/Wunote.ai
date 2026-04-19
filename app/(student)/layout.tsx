@@ -30,6 +30,7 @@ const NAV = [
   { href: "/bookmarks", label: "북마크" },
   { href: "/progress", label: "리포트" },
   { href: "/cardnews", label: "카드뉴스" },
+  { href: "/assignments", label: "과제" },
   { href: "/badges", label: "배지" },
 ];
 
