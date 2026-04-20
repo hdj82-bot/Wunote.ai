@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "appName": "Wunote",
+    "tagline": "AI 중국어 오류 교정 PWA"
+  },
+  "nav": {
+    "student": {
+      "learn": "학습",
+      "errors": "오류 기록",
+      "vocabulary": "단어장",
+      "bookmarks": "북마크",
+      "progress": "리포트",
+      "cardnews": "카드뉴스",
+      "assignments": "과제",
+      "badges": "배지",
+      "goals": "목표",
+      "translate": "번역",
+      "portfolio": "포트폴리오",
+      "peerReview": "동료 리뷰",
+      "pronunciation": "발음 연습",
+      "notifications": "알림 설정",
+      "dataExport": "데이터 내보내기"
+    },
+    "professor": {
+      "dashboard": "대시보드",
+      "classes": "수업 관리",
+      "marketplace": "마켓플레이스",
+      "reports": "리포트",
+      "settings": "설정",
+      "dataExport": "데이터 내보내기",
+      "apiKeys": "API 키"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "로그인",
+      "email": "이메일",
+      "password": "비밀번호",
+      "submit": "로그인",
+      "loading": "로그인 중…",
+      "noAccount": "계정이 없으신가요?",
+      "goSignup": "회원가입",
+      "errorInvalid": "이메일 또는 비밀번호가 올바르지 않습니다"
+    },
+    "signup": {
+      "title": "회원가입",
+      "name": "이름",
+      "email": "이메일",
+      "password": "비밀번호",
+      "role": "역할",
+      "roleStudent": "학생",
+      "roleProfessor": "교수",
+      "submit": "가입하기",
+      "loading": "가입 중…",
+      "hasAccount": "이미 계정이 있으신가요?",
+      "goLogin": "로그인",
+      "errorGeneric": "회원가입에 실패했습니다"
+    }
+  },
+  "landing": {
+    "heading": "한국 대학 중국어 학습자를 위한 AI 오류 교정",
+    "subheading": "직접 쓴 중국어를 Claude 가 분석해 4필드 오류 카드로 피드백합니다",
+    "ctaLogin": "로그인",
+    "ctaSignup": "시작하기"
+  },
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "loading": "불러오는 중…",
+    "error": "오류가 발생했습니다",
+    "retry": "다시 시도",
+    "confirm": "확인",
+    "close": "닫기",
+    "back": "뒤로",
+    "next": "다음",
+    "submit": "제출",
+    "required": "필수"
+  },
+  "language": {
+    "label": "언어",
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語"
+  }
+}

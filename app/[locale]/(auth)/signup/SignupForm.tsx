@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import { useTranslations } from "next-intl";
 import { signup, type SignupState } from "./actions";
 import { createBrowserClient } from "@/lib/supabase";
 import Button from "@/components/ui/Button";
@@ -12,14 +13,16 @@ type Role = "student" | "professor";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
+  const t = useTranslations("auth.signup");
   return (
     <Button type="submit" disabled={pending} className="w-full">
-      {pending ? "가입 중…" : "회원가입"}
+      {pending ? t("loading") : t("submit")}
     </Button>
   );
 }
 
 export default function SignupForm() {
+  const t = useTranslations("auth.signup");
   const [state, formAction] = useFormState(signup, initial);
   const [role, setRole] = useState<Role>("student");
 
@@ -27,21 +30,21 @@ export default function SignupForm() {
     <form action={formAction} className="space-y-4">
       <div>
         <label htmlFor="name" className="mb-1 block text-sm font-medium text-slate-700">
-          이름
+          {t("name")}
         </label>
         <Input id="name" name="name" required />
       </div>
 
       <div>
         <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
-          이메일
+          {t("email")}
         </label>
         <Input id="email" type="email" name="email" required autoComplete="email" />
       </div>
 
       <div>
         <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
-          비밀번호 (8자 이상)
+          {t("password")}
         </label>
         <Input
           id="password"
@@ -54,7 +57,7 @@ export default function SignupForm() {
       </div>
 
       <fieldset>
-        <legend className="mb-1 block text-sm font-medium text-slate-700">역할</legend>
+        <legend className="mb-1 block text-sm font-medium text-slate-700">{t("role")}</legend>
         <div className="flex gap-2">
           {(["student", "professor"] as const).map((r) => (
             <label
@@ -73,7 +76,7 @@ export default function SignupForm() {
                 onChange={() => setRole(r)}
                 className="sr-only"
               />
-              {r === "student" ? "학생" : "교수"}
+              {r === "student" ? t("roleStudent") : t("roleProfessor")}
             </label>
           ))}
         </div>
@@ -82,6 +85,7 @@ export default function SignupForm() {
       {role === "student" && (
         <div>
           <label htmlFor="student_id" className="mb-1 block text-sm font-medium text-slate-700">
+            {/* 학번(선택) — messages 키 누락 시 한국어 fallback */}
             학번 (선택)
           </label>
           <Input id="student_id" name="student_id" />
@@ -116,7 +120,7 @@ export default function SignupForm() {
           })
         }
       >
-        Google로 로그인
+        Google
       </Button>
     </form>
   );
