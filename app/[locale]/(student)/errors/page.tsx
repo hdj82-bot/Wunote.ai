@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { createServerClient } from "@/lib/supabase";
 import ErrorCardInteractive from "@/components/learn/ErrorCardInteractive";
 import type { AnalysisError, CotStep, ErrorType } from "@/types";
@@ -76,24 +77,30 @@ function formatDate(iso: string): string {
 }
 
 export default async function ErrorsPage() {
-  const { rows, bookmarkedIds, inVocabIds } = await loadData();
+  const [t, { rows, bookmarkedIds, inVocabIds }] = await Promise.all([
+    getTranslations("pages.student.errors"),
+    loadData(),
+  ]);
 
   return (
     <section className="mx-auto w-full max-w-3xl space-y-3 p-4">
       <div className="flex items-baseline justify-between">
-        <h1 className="text-lg font-bold text-slate-900">오류 기록</h1>
-        <p className="text-xs text-slate-500">{rows.length}건</p>
+        <h1 className="text-lg font-bold text-slate-900">{t("title")}</h1>
+        <p className="text-xs text-slate-500">{t("countLabel", { count: rows.length })}</p>
       </div>
 
       {rows.length === 0 ? (
         <p className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-          아직 분석된 오류가 없습니다. 학습 화면에서 문서를 작성해보세요.
+          {t("emptyState")}
         </p>
       ) : (
         rows.map((row, i) => (
           <div key={row.id}>
             <p className="mb-1 text-xs text-slate-500">
-              제{row.chapter_number}장 · {formatDate(row.created_at)}
+              {t("chapterDate", {
+                chapter: row.chapter_number,
+                date: formatDate(row.created_at),
+              })}
             </p>
             <ErrorCardInteractive
               error={toAnalysisError(row, i)}

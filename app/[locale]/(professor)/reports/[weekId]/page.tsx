@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/supabase'
 import { getReport } from '@/lib/professor-reports'
 import Card from '@/components/ui/Card'
@@ -55,6 +56,7 @@ export default async function ReportDetailPage({
 }: {
   params: { weekId: string }
 }) {
+  const t = await getTranslations('pages.professor.reportDetail')
   const supabase = createServerClient()
   const {
     data: { user }
@@ -70,46 +72,54 @@ export default async function ReportDetailPage({
     <main className="mx-auto w-full max-w-4xl space-y-5 p-4">
       <p className="text-xs text-slate-500">
         <Link href="/reports" className="hover:underline">
-          주간 리포트
+          {t('breadcrumbReports')}
         </Link>{' '}
-        › 상세
+        › {t('breadcrumbDetail')}
       </p>
 
       <header className="space-y-1">
-        <h1 className="text-lg font-bold text-slate-900">{report.class_name} 주간 리포트</h1>
+        <h1 className="text-lg font-bold text-slate-900">
+          {t('titleSuffix', { className: report.class_name })}
+        </h1>
         <p className="text-xs text-slate-500">
-          {formatDate(report.week_start)} ~ {formatDate(weekEnd)} · 생성 {formatDate(report.created_at)}
+          {t('dateRange', {
+            weekStart: formatDate(report.week_start),
+            weekEnd: formatDate(weekEnd),
+            created: formatDate(report.created_at)
+          })}
         </p>
       </header>
 
       <section className="grid gap-2 sm:grid-cols-5">
         <Card className="p-3">
-          <p className="text-[10px] text-slate-500">수강생</p>
+          <p className="text-[10px] text-slate-500">{t('statStudents')}</p>
           <p className="mt-1 text-base font-bold text-slate-900">
             {report.metrics.total_students}
           </p>
-          <p className="text-[10px] text-slate-500">활동 {report.metrics.active_students}</p>
+          <p className="text-[10px] text-slate-500">
+            {t('statActiveSub', { count: report.metrics.active_students })}
+          </p>
         </Card>
         <Card className="p-3">
-          <p className="text-[10px] text-slate-500">세션</p>
+          <p className="text-[10px] text-slate-500">{t('statSessions')}</p>
           <p className="mt-1 text-base font-bold text-slate-900">
             {report.metrics.total_sessions}
           </p>
         </Card>
         <Card className="p-3">
-          <p className="text-[10px] text-slate-500">오류</p>
+          <p className="text-[10px] text-slate-500">{t('statErrors')}</p>
           <p className="mt-1 text-base font-bold text-slate-900">
             {report.metrics.total_errors}
           </p>
         </Card>
         <Card className="p-3">
-          <p className="text-[10px] text-slate-500">세션당 평균 오류</p>
+          <p className="text-[10px] text-slate-500">{t('statAvgErrors')}</p>
           <p className="mt-1 text-base font-bold text-slate-900">
             {report.metrics.avg_errors_per_session.toFixed(2)}
           </p>
         </Card>
         <Card className="p-3">
-          <p className="text-[10px] text-slate-500">화석화</p>
+          <p className="text-[10px] text-slate-500">{t('statFossil')}</p>
           <p className="mt-1 text-base font-bold text-amber-700">
             {report.fossilization_alerts.length}
           </p>
@@ -118,9 +128,9 @@ export default async function ReportDetailPage({
 
       {/* 5블록: 포커스 / 칭찬 / 관심 필요 / 화석화 / 다음 수업 */}
       <section className="space-y-3">
-        <BlockShell tone="focus" title="① 포커스 포인트">
+        <BlockShell tone="focus" title={t('blockFocus')}>
           {report.focus_points.length === 0 ? (
-            <p className="text-xs text-slate-500">집중 관찰할 오류 유형이 분석되지 않았습니다.</p>
+            <p className="text-xs text-slate-500">{t('blockFocusEmpty')}</p>
           ) : (
             <ul className="space-y-2">
               {report.focus_points.map((f, i) => (
@@ -128,7 +138,7 @@ export default async function ReportDetailPage({
                   <p className="text-sm font-medium text-slate-800">
                     {f.error_subtype}{' '}
                     <span className="text-xs text-slate-500">
-                      ({f.incidence}회)
+                      {t('blockFocusIncidence', { count: f.incidence })}
                     </span>
                   </p>
                   <p className="mt-1 text-xs text-slate-600">{f.reason}</p>
@@ -138,9 +148,9 @@ export default async function ReportDetailPage({
           )}
         </BlockShell>
 
-        <BlockShell tone="praise" title="② 칭찬 — 긍정적 변화">
+        <BlockShell tone="praise" title={t('blockPraise')}>
           {report.praise_students.length === 0 ? (
-            <p className="text-xs text-slate-500">이번 주 특별히 부각된 학생이 없습니다.</p>
+            <p className="text-xs text-slate-500">{t('blockPraiseEmpty')}</p>
           ) : (
             <ul className="space-y-2">
               {report.praise_students.map(p => (
@@ -153,9 +163,9 @@ export default async function ReportDetailPage({
           )}
         </BlockShell>
 
-        <BlockShell tone="care" title="③ 관심 필요 학습자">
+        <BlockShell tone="care" title={t('blockCare')}>
           {report.care_students.length === 0 ? (
-            <p className="text-xs text-slate-500">관심이 필요한 학생이 지정되지 않았습니다.</p>
+            <p className="text-xs text-slate-500">{t('blockCareEmpty')}</p>
           ) : (
             <ul className="space-y-2">
               {report.care_students.map(c => (
@@ -169,9 +179,9 @@ export default async function ReportDetailPage({
           )}
         </BlockShell>
 
-        <BlockShell tone="alert" title="④ 화석화 위험">
+        <BlockShell tone="alert" title={t('blockAlert')}>
           {report.fossilization_alerts.length === 0 ? (
-            <p className="text-xs text-slate-500">화석화 임계(3회+) 에 도달한 학생이 없습니다.</p>
+            <p className="text-xs text-slate-500">{t('blockAlertEmpty')}</p>
           ) : (
             <ul className="space-y-1 text-xs">
               {report.fossilization_alerts.map((a, i) => (
@@ -181,16 +191,18 @@ export default async function ReportDetailPage({
                 >
                   <span className="font-medium text-slate-800">{a.name}</span>
                   <span className="text-slate-600">{a.error_subtype}</span>
-                  <span className="text-amber-700">{a.count}회</span>
+                  <span className="text-amber-700">
+                    {t('blockAlertCountSuffix', { count: a.count })}
+                  </span>
                 </li>
               ))}
             </ul>
           )}
         </BlockShell>
 
-        <BlockShell tone="suggest" title="⑤ 다음 수업 제안">
+        <BlockShell tone="suggest" title={t('blockSuggest')}>
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-800">
-            {report.next_class_suggestion || '(제안 없음)'}
+            {report.next_class_suggestion || t('blockSuggestEmpty')}
           </p>
         </BlockShell>
       </section>

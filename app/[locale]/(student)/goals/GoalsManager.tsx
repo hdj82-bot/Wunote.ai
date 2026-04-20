@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
@@ -17,18 +18,6 @@ interface Props {
   initialProgress: GoalProgress[];
 }
 
-const TYPE_LABEL: Record<GoalType, string> = {
-  error_type: "특정 오류 유형 소거",
-  error_count: "미해결 오류 수 이하로 유지",
-  vocab_count: "단어장 누적 개수 달성",
-};
-
-const TYPE_HINT: Record<GoalType, string> = {
-  error_type: "목표 값: 소거할 error_subtype 이름 (예: 把字句오류)",
-  error_count: "목표 값: 유지할 미해결 오류 개수 상한 (숫자)",
-  vocab_count: "목표 값: 도달할 단어장 개수 (숫자)",
-};
-
 function formatDeadline(iso: string | null): string | null {
   if (!iso) return null;
   return iso.slice(0, 10);
@@ -42,6 +31,26 @@ function progressBarColor(pct: number, achieved: boolean): string {
 }
 
 export default function GoalsManager({ initialGoals, initialProgress }: Props) {
+  const t = useTranslations("pages.student.goals");
+
+  const TYPE_LABEL: Record<GoalType, string> = useMemo(
+    () => ({
+      error_type: t("typeErrorType"),
+      error_count: t("typeErrorCount"),
+      vocab_count: t("typeVocabCount"),
+    }),
+    [t]
+  );
+
+  const TYPE_HINT: Record<GoalType, string> = useMemo(
+    () => ({
+      error_type: t("hintErrorType"),
+      error_count: t("hintErrorCount"),
+      vocab_count: t("hintVocabCount"),
+    }),
+    [t]
+  );
+
   const [goals, setGoals] = useState<LearningGoal[]>(initialGoals);
   const [progressList, setProgressList] = useState<GoalProgress[]>(initialProgress);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -70,7 +79,7 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
     setError(null);
     const target = newTarget.trim();
     if (!target) {
-      setError("목표 값을 입력하세요");
+      setError(t("targetRequired"));
       return;
     }
     setCreating(true);
@@ -86,8 +95,8 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
         body: JSON.stringify(input),
       });
       if (!res.ok) {
-        const body = await res.json().catch(() => ({ error: "생성 실패" }));
-        setError(body.error ?? "생성 실패");
+        const body = await res.json().catch(() => ({ error: t("createFailed") }));
+        setError(body.error ?? t("createFailed"));
         return;
       }
       const body = (await res.json()) as GoalMutationResponse;
@@ -98,31 +107,34 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
     } finally {
       setCreating(false);
     }
-  }, [newType, newTarget, newDeadline]);
+  }, [newType, newTarget, newDeadline, t]);
 
-  const toggleAchieved = useCallback(async (goal: LearningGoal) => {
-    setBusyId(goal.id);
-    setError(null);
-    try {
-      const res = await fetch(`/api/goals/${goal.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_achieved: !goal.is_achieved }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({ error: "수정 실패" }));
-        setError(body.error ?? "수정 실패");
-        return;
+  const toggleAchieved = useCallback(
+    async (goal: LearningGoal) => {
+      setBusyId(goal.id);
+      setError(null);
+      try {
+        const res = await fetch(`/api/goals/${goal.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ is_achieved: !goal.is_achieved }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({ error: t("updateFailed") }));
+          setError(body.error ?? t("updateFailed"));
+          return;
+        }
+        const body = (await res.json()) as GoalMutationResponse;
+        setGoals((prev) => prev.map((g) => (g.id === body.goal.id ? body.goal : g)));
+        setProgressList((prev) =>
+          prev.map((p) => (p.goal.id === body.goal.id ? body.progress : p))
+        );
+      } finally {
+        setBusyId(null);
       }
-      const body = (await res.json()) as GoalMutationResponse;
-      setGoals((prev) => prev.map((g) => (g.id === body.goal.id ? body.goal : g)));
-      setProgressList((prev) =>
-        prev.map((p) => (p.goal.id === body.goal.id ? body.progress : p))
-      );
-    } finally {
-      setBusyId(null);
-    }
-  }, []);
+    },
+    [t]
+  );
 
   const remove = useCallback(
     async (id: string) => {
@@ -131,8 +143,8 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
       try {
         const res = await fetch(`/api/goals/${id}`, { method: "DELETE" });
         if (!res.ok) {
-          const body = await res.json().catch(() => ({ error: "삭제 실패" }));
-          setError(body.error ?? "삭제 실패");
+          const body = await res.json().catch(() => ({ error: t("deleteFailed") }));
+          setError(body.error ?? t("deleteFailed"));
           return;
         }
         setGoals((prev) => prev.filter((g) => g.id !== id));
@@ -141,39 +153,43 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
         setBusyId(null);
       }
     },
-    []
+    [t]
   );
 
   return (
     <div className="space-y-4">
       <Card className="space-y-3 p-4">
-        <h2 className="text-sm font-semibold text-slate-800">새 목표 추가</h2>
+        <h2 className="text-sm font-semibold text-slate-800">{t("newHeading")}</h2>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <label className="text-xs text-slate-600">
-            <span className="mb-1 block">목표 유형</span>
+            <span className="mb-1 block">{t("typeLabel")}</span>
             <select
               value={newType}
               onChange={(e) => setNewType(e.target.value as GoalType)}
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
             >
-              {(Object.keys(TYPE_LABEL) as GoalType[]).map((t) => (
-                <option key={t} value={t}>
-                  {TYPE_LABEL[t]}
+              {(Object.keys(TYPE_LABEL) as GoalType[]).map((type) => (
+                <option key={type} value={type}>
+                  {TYPE_LABEL[type]}
                 </option>
               ))}
             </select>
           </label>
           <label className="text-xs text-slate-600">
-            <span className="mb-1 block">목표 값</span>
+            <span className="mb-1 block">{t("targetLabel")}</span>
             <Input
               value={newTarget}
               onChange={(e) => setNewTarget(e.target.value)}
-              placeholder={newType === "error_type" ? "예: 把字句오류" : "예: 50"}
+              placeholder={
+                newType === "error_type"
+                  ? t("targetPlaceholderErrorType")
+                  : t("targetPlaceholderNumeric")
+              }
               inputMode={newType === "error_type" ? "text" : "numeric"}
             />
           </label>
           <label className="text-xs text-slate-600">
-            <span className="mb-1 block">마감일 (선택)</span>
+            <span className="mb-1 block">{t("deadlineLabel")}</span>
             <Input
               type="date"
               value={newDeadline}
@@ -188,10 +204,10 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
           </p>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" onClick={refresh} disabled={creating}>
-              새로고침
+              {t("refresh")}
             </Button>
             <Button size="sm" onClick={create} disabled={creating}>
-              {creating ? "추가 중…" : "목표 추가"}
+              {creating ? t("adding") : t("add")}
             </Button>
           </div>
         </div>
@@ -199,7 +215,7 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
 
       {goals.length === 0 ? (
         <p className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-          아직 목표가 없습니다. 위에서 첫 목표를 설정해보세요.
+          {t("emptyState")}
         </p>
       ) : (
         <ul className="space-y-3">
@@ -209,6 +225,11 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
             const achieved = prog?.isAchieved ?? g.is_achieved;
             const deadline = formatDeadline(g.deadline);
             const busy = busyId === g.id;
+            const statusLabel = achieved
+              ? t("statusAchieved")
+              : prog?.direction === "increase"
+                ? t("statusAccumulating")
+                : t("statusImproving");
             return (
               <li key={g.id}>
                 <Card className="space-y-2 p-4">
@@ -218,14 +239,22 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
                         {TYPE_LABEL[g.goal_type]}
                       </p>
                       <p className="text-xs text-slate-600">
-                        목표: <span className="font-mono">{g.target_value}</span>
+                        {t("targetPrefix")}
+                        <span className="font-mono">{g.target_value}</span>
                         {prog && (
                           <>
-                            {" · "}현재:{" "}
+                            {" · "}
+                            {t("currentPrefix")}
                             <span className="font-mono">{prog.current}</span>
                           </>
                         )}
-                        {deadline && <> · 마감 {deadline}</>}
+                        {deadline && (
+                          <>
+                            {" · "}
+                            {t("deadlinePrefix")}
+                            {deadline}
+                          </>
+                        )}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1">
@@ -237,11 +266,9 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
                             : "bg-slate-100 text-slate-600")
                         }
                       >
-                        {achieved ? "달성" : prog?.direction === "increase" ? "누적중" : "개선중"}
+                        {statusLabel}
                       </span>
-                      <span className="text-xs tabular-nums text-slate-700">
-                        {pct}%
-                      </span>
+                      <span className="text-xs tabular-nums text-slate-700">{pct}%</span>
                     </div>
                   </div>
 
@@ -263,7 +290,7 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
                       onClick={() => toggleAchieved(g)}
                       disabled={busy}
                     >
-                      {g.is_achieved ? "달성 해제" : "달성 표시"}
+                      {g.is_achieved ? t("markNotAchieved") : t("markAchieved")}
                     </Button>
                     <Button
                       variant="ghost"
@@ -272,7 +299,7 @@ export default function GoalsManager({ initialGoals, initialProgress }: Props) {
                       disabled={busy}
                       className="text-red-600 hover:bg-red-50"
                     >
-                      삭제
+                      {t("delete")}
                     </Button>
                   </div>
                 </Card>

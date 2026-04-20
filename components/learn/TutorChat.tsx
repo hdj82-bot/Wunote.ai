@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { AnalysisError, ChatMessage, ChatRequest } from "@/types";
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export default function TutorChat({ focusedError, chapterNumber }: Props) {
+  const t = useTranslations("pages.components.tutorChat");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -51,7 +53,7 @@ export default function TutorChat({ focusedError, chapterNumber }: Props) {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "죄송합니다. 응답을 받지 못했어요." },
+        { role: "assistant", content: t("errorFallback") },
       ]);
     } finally {
       setSending(false);
@@ -61,18 +63,16 @@ export default function TutorChat({ focusedError, chapterNumber }: Props) {
   return (
     <div className="flex h-full flex-col bg-white">
       <header className="flex items-center justify-between border-b px-3 py-2 text-sm font-semibold text-slate-700">
-        <span>🤖 AI 과외 채팅</span>
+        <span>{t("heading")}</span>
         {focusedError && (
           <span className="rounded bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">
-            컨텍스트: {focusedError.error_subtype}
+            {t("contextLabel", { subtype: focusedError.error_subtype })}
           </span>
         )}
       </header>
       <div className="min-h-0 flex-1 space-y-2 overflow-auto p-3">
         {messages.length === 0 && (
-          <p className="text-center text-sm text-slate-400">
-            오류 카드를 클릭하거나 자유롭게 질문해보세요.
-          </p>
+          <p className="text-center text-sm text-slate-400">{t("emptyState")}</p>
         )}
         {messages.map((m, i) => (
           <div
@@ -97,7 +97,7 @@ export default function TutorChat({ focusedError, chapterNumber }: Props) {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="질문을 입력하세요..."
+          placeholder={t("inputPlaceholder")}
           className="flex-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-indigo-500"
         />
         <button
@@ -105,7 +105,7 @@ export default function TutorChat({ focusedError, chapterNumber }: Props) {
           disabled={sending || !input.trim()}
           className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40"
         >
-          전송
+          {t("send")}
         </button>
       </form>
     </div>

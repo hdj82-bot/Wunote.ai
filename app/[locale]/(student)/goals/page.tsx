@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { createServerClient } from "@/lib/supabase";
 import { calcProgressForGoals } from "@/lib/goals";
 import type { GoalProgress, LearningGoal } from "@/types/goals";
@@ -26,13 +27,16 @@ async function loadGoals(): Promise<{ goals: LearningGoal[]; progress: GoalProgr
 }
 
 export default async function GoalsPage() {
-  const { goals, progress } = await loadGoals();
+  const [t, { goals, progress }] = await Promise.all([
+    getTranslations("pages.student.goals"),
+    loadGoals(),
+  ]);
 
   return (
     <section className="mx-auto w-full max-w-3xl space-y-4 p-4">
       <div className="flex items-baseline justify-between">
-        <h1 className="text-lg font-bold text-slate-900">학습 목표</h1>
-        <p className="text-xs text-slate-500">{goals.length}개</p>
+        <h1 className="text-lg font-bold text-slate-900">{t("title")}</h1>
+        <p className="text-xs text-slate-500">{t("countLabel", { count: goals.length })}</p>
       </div>
       <GoalsManager initialGoals={goals} initialProgress={progress} />
     </section>
