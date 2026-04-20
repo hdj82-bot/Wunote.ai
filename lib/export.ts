@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { createServerClient } from '@/lib/supabase'
+import { createServerClient, createAdminClient } from '@/lib/supabase'
 import type {
   ResearchExportOptions,
   ResearchExportPayload,
@@ -46,29 +46,52 @@ export function buildDownloadResponse(
   })
 }
 
+// ============================================================
+// 연구용 교수자 일괄 익스포트
+// ============================================================
+
+interface ClassRow {
+  id: string
+  name: string
+  semester: string
+}
+interface EnrollmentRow {
+  student_id: string
+  enrolled_at: string
+}
+interface SessionRow {
+  id: string
+  student_id: string
+  chapter_number: number
+  revision_error_count: number | null
+  created_at: string
+}
+
 export async function assembleProfessorExport(
   professorId: string,
   options: ResearchExportOptions
 ): Promise<ResearchExportPayload> {
   const supabase = createServerClient()
 
-  const { data: klass, error: classError } = await supabase
+  const { data: klassData, error: classError } = await supabase
     .from('classes')
     .select('id, name, semester')
     .eq('id', options.classId)
     .eq('professor_id', professorId)
     .maybeSingle()
 
+  const klass = klassData as ClassRow | null
   if (classError || !klass) {
     throw new Error('Class not found or access denied')
   }
 
-  const { data: enrollments } = await supabase
+  const { data: enrollmentsData } = await supabase
     .from('enrollments')
-    .select('student_id, created_at')
+    .select('student_id, enrolled_at')
     .eq('class_id', options.classId)
 
-  const studentIds = (enrollments ?? []).map(e => e.student_id as string)
+  const enrollments = (enrollmentsData ?? []) as EnrollmentRow[]
+  const studentIds = enrollments.map(e => e.student_id)
 
   const hashMap = new Map<string, string>()
   for (const id of studentIds) {
@@ -81,8 +104,8 @@ export async function assembleProfessorExport(
     return {
       metadata: {
         classId: options.classId,
-        className: klass.name as string,
-        semester: klass.semester as string,
+        className: klass.name,
+        semester: klass.semester,
         exportedAt: new Date().toISOString(),
         startDate: options.startDate ?? null,
         endDate: options.endDate ?? null,
@@ -99,7 +122,7 @@ export async function assembleProfessorExport(
 
   let sessionsQuery = supabase
     .from('sessions')
-    .select('id, student_id, chapter_number, session_error_count, created_at')
+    .select('id, student_id, chapter_number, revision_error_count, created_at')
     .eq('class_id', options.classId)
     .in('student_id', studentIds)
     .order('created_at', { ascending: true })
@@ -111,8 +134,9 @@ export async function assembleProfessorExport(
     sessionsQuery = sessionsQuery.lte('created_at', `${options.endDate}T23:59:59Z`)
   }
 
-  const { data: sessions } = await sessionsQuery
-  const sessionIds = (sessions ?? []).map(s => s.id as string)
+  const { data: sessionsData } = await sessionsQuery
+  const sessions = (sessionsData ?? []) as SessionRow[]
+  const sessionIds = sessions.map(s => s.id)
 
   type ErrorCardRow = {
     session_id: string
@@ -143,8 +167,8 @@ export async function assembleProfessorExport(
     string,
     { sessionCount: number; totalErrors: number; lastActiveAt: string }
   >()
-  for (const session of sessions ?? []) {
-    const sid = session.student_id as string
+  for (const session of sessions) {
+    const sid = session.student_id
     const existing = progressMap.get(sid) ?? {
       sessionCount: 0,
       totalErrors: 0,
@@ -152,10 +176,10 @@ export async function assembleProfessorExport(
     }
     progressMap.set(sid, {
       sessionCount: existing.sessionCount + 1,
-      totalErrors: existing.totalErrors + ((session.session_error_count as number) ?? 0),
+      totalErrors: existing.totalErrors + (session.revision_error_count ?? 0),
       lastActiveAt:
-        (session.created_at as string) > existing.lastActiveAt
-          ? (session.created_at as string)
+        session.created_at > existing.lastActiveAt
+          ? session.created_at
           : existing.lastActiveAt,
     })
   }
@@ -163,9 +187,9 @@ export async function assembleProfessorExport(
   const getHash = (id: string) =>
     shouldAnonymize ? (hashMap.get(id) ?? anonymizeId(id)) : id
 
-  const students = (enrollments ?? []).map(e => ({
-    studentHash: getHash(e.student_id as string),
-    enrolledAt: e.created_at as string,
+  const students = enrollments.map(e => ({
+    studentHash: getHash(e.student_id),
+    enrolledAt: e.enrolled_at,
   }))
 
   const errors = errorCardsData.map(card => ({
@@ -195,14 +219,14 @@ export async function assembleProfessorExport(
   return {
     metadata: {
       classId: options.classId,
-      className: klass.name as string,
-      semester: klass.semester as string,
+      className: klass.name,
+      semester: klass.semester,
       exportedAt: new Date().toISOString(),
       startDate: options.startDate ?? null,
       endDate: options.endDate ?? null,
       anonymizationLevel: options.anonymizationLevel,
       totalStudents: students.length,
-      totalSessions: (sessions ?? []).length,
+      totalSessions: sessions.length,
       totalErrors: errorCardsData.length,
     },
     students,
@@ -211,51 +235,66 @@ export async function assembleProfessorExport(
   }
 }
 
+// ============================================================
+// 학습자 본인 데이터 이동권 익스포트
+// ============================================================
+
+interface StudentProfileRow {
+  id: string
+  role: string
+  created_at: string
+}
+
 export async function assembleStudentExport(
   userId: string
 ): Promise<StudentDataExportPayload> {
   const supabase = createServerClient()
+  const admin = createAdminClient()
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id, email, role, created_at')
-    .eq('id', userId)
-    .maybeSingle()
+  // profiles 에 email 컬럼이 없어 auth.users 에서 가져온다.
+  const { data: authUser } = await admin.auth.admin.getUserById(userId)
+  const email = authUser?.user?.email ?? ''
 
-  const { data: sessions } = await supabase
-    .from('sessions')
-    .select('id, class_id, chapter_number, draft_error_count, session_error_count, created_at')
-    .eq('student_id', userId)
-    .order('created_at', { ascending: false })
+  const [
+    { data: profileData },
+    { data: sessionsData },
+    { data: errorCards },
+    { data: vocabularyData },
+    { data: bookmarksData },
+    badgesQuery,
+  ] = await Promise.all([
+    supabase.from('profiles').select('id, role, created_at').eq('id', userId).maybeSingle(),
+    supabase
+      .from('sessions')
+      .select('id, class_id, chapter_number, draft_error_count, revision_error_count, created_at')
+      .eq('student_id', userId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('error_cards')
+      .select(
+        'id, session_id, chapter_number, error_type, error_subtype, error_span, correction, explanation, fossilization_count, hsk_level, created_at'
+      )
+      .eq('student_id', userId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('vocabulary')
+      .select('id, chinese, korean, created_at')
+      .eq('student_id', userId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('bookmarks')
+      .select('id, sentence, created_at')
+      .eq('student_id', userId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('badges')
+      .select('id, badge_type, earned_at')
+      .eq('student_id', userId)
+      .order('earned_at', { ascending: false }),
+  ])
 
-  const { data: errorCards } = await supabase
-    .from('error_cards')
-    .select(
-      'id, session_id, chapter_number, error_type, error_subtype, error_span, correction, explanation, fossilization_count, hsk_level, created_at'
-    )
-    .eq('student_id', userId)
-    .order('created_at', { ascending: false })
-
-  const { data: vocabulary } = await supabase
-    .from('vocabulary')
-    .select('id, word, translation, created_at')
-    .eq('student_id', userId)
-    .order('created_at', { ascending: false })
-
-  const { data: bookmarks } = await supabase
-    .from('bookmarks')
-    .select('id, content, created_at')
-    .eq('student_id', userId)
-    .order('created_at', { ascending: false })
-
-  const { data: badges, error: badgesError } = await supabase
-    .from('badges')
-    .select('id, badge_type, earned_at')
-    .eq('student_id', userId)
-    .order('earned_at', { ascending: false })
-
-  type ProfileRow = { id: string; email: string; role: string; created_at: string }
-  const p = profile as ProfileRow | null
+  const p = profileData as StudentProfileRow | null
+  const { data: badgesData, error: badgesError } = badgesQuery
 
   return {
     metadata: {
@@ -263,7 +302,7 @@ export async function assembleStudentExport(
       userId,
     },
     profile: p
-      ? { id: p.id, email: p.email, role: p.role, createdAt: p.created_at }
+      ? { id: p.id, email, role: p.role, createdAt: p.created_at }
       : null,
     errors: (errorCards ?? []).map((card: Record<string, unknown>) => ({
       id: card.id as string,
@@ -278,28 +317,28 @@ export async function assembleStudentExport(
       hskLevel: card.hsk_level as number | null,
       createdAt: card.created_at as string,
     })),
-    sessions: (sessions ?? []).map((s: Record<string, unknown>) => ({
+    sessions: (sessionsData ?? []).map((s: Record<string, unknown>) => ({
       id: s.id as string,
       classId: s.class_id as string,
       chapter: s.chapter_number as number,
       draftErrorCount: (s.draft_error_count as number) ?? 0,
-      sessionErrorCount: (s.session_error_count as number) ?? 0,
+      sessionErrorCount: (s.revision_error_count as number) ?? 0,
       createdAt: s.created_at as string,
     })),
-    vocabulary: (vocabulary ?? []).map((v: Record<string, unknown>) => ({
+    vocabulary: (vocabularyData ?? []).map((v: Record<string, unknown>) => ({
       id: v.id as string,
-      word: v.word as string,
-      translation: (v.translation as string) ?? '',
+      word: (v.chinese as string) ?? '',
+      translation: (v.korean as string) ?? '',
       createdAt: v.created_at as string,
     })),
-    bookmarks: (bookmarks ?? []).map((b: Record<string, unknown>) => ({
+    bookmarks: (bookmarksData ?? []).map((b: Record<string, unknown>) => ({
       id: b.id as string,
-      content: b.content as string,
+      content: (b.sentence as string) ?? '',
       createdAt: b.created_at as string,
     })),
     badges: badgesError
       ? []
-      : (badges ?? []).map((b: Record<string, unknown>) => ({
+      : (badgesData ?? []).map((b: Record<string, unknown>) => ({
           id: b.id as string,
           badgeType: b.badge_type as string,
           earnedAt: b.earned_at as string,

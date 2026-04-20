@@ -696,6 +696,45 @@ export type Database = {
         }
         Relationships: []
       }
+      api_keys: {
+        Row: {
+          id: string
+          professor_id: string
+          key_hash: string
+          name: string
+          scopes: string[]
+          last_used_at: string | null
+          rate_window_start: string | null
+          rate_window_count: number
+          created_at: string
+          is_active: boolean
+        }
+        Insert: {
+          id?: string
+          professor_id: string
+          key_hash: string
+          name: string
+          scopes?: string[]
+          last_used_at?: string | null
+          rate_window_start?: string | null
+          rate_window_count?: number
+          created_at?: string
+          is_active?: boolean
+        }
+        Update: {
+          id?: string
+          professor_id?: string
+          key_hash?: string
+          name?: string
+          scopes?: string[]
+          last_used_at?: string | null
+          rate_window_start?: string | null
+          rate_window_count?: number
+          created_at?: string
+          is_active?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
