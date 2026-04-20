@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "appName": "Wunote",
+    "tagline": "AI-powered Chinese error correction PWA"
+  },
+  "nav": {
+    "student": {
+      "learn": "Learn",
+      "errors": "Error Log",
+      "vocabulary": "Vocabulary",
+      "bookmarks": "Bookmarks",
+      "progress": "Progress",
+      "cardnews": "Card News",
+      "assignments": "Assignments",
+      "badges": "Badges",
+      "goals": "Goals",
+      "translate": "Translate",
+      "portfolio": "Portfolio",
+      "peerReview": "Peer Review",
+      "pronunciation": "Pronunciation",
+      "notifications": "Notifications",
+      "dataExport": "Export Data"
+    },
+    "professor": {
+      "dashboard": "Dashboard",
+      "classes": "Classes",
+      "marketplace": "Marketplace",
+      "reports": "Reports",
+      "settings": "Settings",
+      "dataExport": "Export Data",
+      "apiKeys": "API Keys"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Log in",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Log in",
+      "loading": "Logging in…",
+      "noAccount": "Don't have an account?",
+      "goSignup": "Sign up",
+      "errorInvalid": "Invalid email or password"
+    },
+    "signup": {
+      "title": "Sign up",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "role": "Role",
+      "roleStudent": "Student",
+      "roleProfessor": "Professor",
+      "submit": "Create account",
+      "loading": "Creating…",
+      "hasAccount": "Already have an account?",
+      "goLogin": "Log in",
+      "errorGeneric": "Sign-up failed"
+    }
+  },
+  "landing": {
+    "heading": "AI error correction for Korean university learners of Chinese",
+    "subheading": "Claude analyzes your Chinese writing and returns 4-field error cards",
+    "ctaLogin": "Log in",
+    "ctaSignup": "Get started"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading…",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "confirm": "OK",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "required": "Required"
+  },
+  "language": {
+    "label": "Language",
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語"
+  }
+}

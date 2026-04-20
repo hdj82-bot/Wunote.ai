@@ -1,19 +1,24 @@
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
 import OfflineIndicator from "@/components/OfflineIndicator";
 
-export const metadata: Metadata = {
-  title: "Wunote",
-  description: "AI 중국어 오류 교정 PWA",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return {
+    title: t("appName"),
+    description: t("tagline"),
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
   return (
-    <html lang="ko">
+    <html lang={locale}>
       <body>
         {children}
         <OfflineIndicator />

@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "appName": "Wunote",
+    "tagline": "AI中国語エラー訂正PWA"
+  },
+  "nav": {
+    "student": {
+      "learn": "学習",
+      "errors": "エラー記録",
+      "vocabulary": "単語帳",
+      "bookmarks": "ブックマーク",
+      "progress": "レポート",
+      "cardnews": "カードニュース",
+      "assignments": "課題",
+      "badges": "バッジ",
+      "goals": "目標",
+      "translate": "翻訳",
+      "portfolio": "ポートフォリオ",
+      "peerReview": "ピアレビュー",
+      "pronunciation": "発音練習",
+      "notifications": "通知設定",
+      "dataExport": "データ書き出し"
+    },
+    "professor": {
+      "dashboard": "ダッシュボード",
+      "classes": "授業管理",
+      "marketplace": "マーケットプレイス",
+      "reports": "レポート",
+      "settings": "設定",
+      "dataExport": "データ書き出し",
+      "apiKeys": "APIキー"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "ログイン",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "submit": "ログイン",
+      "loading": "ログイン中…",
+      "noAccount": "アカウントをお持ちでないですか？",
+      "goSignup": "新規登録",
+      "errorInvalid": "メールアドレスまたはパスワードが正しくありません"
+    },
+    "signup": {
+      "title": "新規登録",
+      "name": "名前",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "role": "役割",
+      "roleStudent": "学生",
+      "roleProfessor": "教員",
+      "submit": "登録する",
+      "loading": "登録中…",
+      "hasAccount": "すでにアカウントをお持ちですか？",
+      "goLogin": "ログイン",
+      "errorGeneric": "登録に失敗しました"
+    }
+  },
+  "landing": {
+    "heading": "韓国の大学で学ぶ中国語学習者のためのAIエラー訂正",
+    "subheading": "あなたの中国語作文をClaudeが解析し、4フィールドのエラーカードで返します",
+    "ctaLogin": "ログイン",
+    "ctaSignup": "はじめる"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "loading": "読み込み中…",
+    "error": "エラーが発生しました",
+    "retry": "再試行",
+    "confirm": "OK",
+    "close": "閉じる",
+    "back": "戻る",
+    "next": "次へ",
+    "submit": "送信",
+    "required": "必須"
+  },
+  "language": {
+    "label": "言語",
+    "ko": "한국어",
+    "en": "English",
+    "ja": "日本語"
+  }
+}
