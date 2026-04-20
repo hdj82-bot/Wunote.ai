@@ -732,14 +732,33 @@ Claude API로 어휘·문체 분석
 - [ ] 웹 푸시·이메일 발송
 
 ### Phase 3
-- [ ] 포트폴리오 PDF 자동 생성
-- [ ] 피어 리뷰
-- [ ] 카카오 알림톡
-- [ ] 발음 연습 (STT + 성조 오류)
-- [ ] 연구 데이터 익스포트 (익명화 CSV/JSON)
-- [ ] API 공개 (외부 LMS 연동)
-- [ ] 학습자 데이터 이동권
-- [ ] 오프라인 모드
+- [x] 포트폴리오 PDF 자동 생성 (/portfolio)
+- [x] 피어 리뷰 기능 (/peer-review)
+- [x] 카카오 알림 연동 (/notifications)
+- [x] 발음 연습 + 억양 오류 감지 (/pronunciation)
+- [x] 연구 데이터 내보내기 + 학습자 데이터 이식성 (/api/export/*, /data-export)
+- [x] LMS Public API + API Key 인증 + Swagger (/api/lms/*, /api/docs)
+- [x] 오프라인 모드 Service Worker (public/sw.js)
+
+### Phase 3 신규 라우트 참조
+
+| 구분 | 라우트 | 설명 |
+|---|---|---|
+| 학생 | `/portfolio` | 포트폴리오 PDF 생성 |
+| 학생 | `/peer-review` | 피어 리뷰 |
+| 학생 | `/pronunciation` | 발음 연습·억양 오류 감지 |
+| 학생 | `/notifications` | 카카오 알림 설정 |
+| 학생 | `/data-export` | 학습자 데이터 내보내기 |
+| 교수 | `/reports/export` | 연구 데이터 익스포트 |
+| 교수 | `/settings/api-keys` | LMS API 키 관리 |
+| 공개 API | `/api/lms/classes` | 교수자 수업 목록 |
+| 공개 API | `/api/lms/classes/[id]/students` | 수강생 명단 |
+| 공개 API | `/api/lms/classes/[id]/assignments` | 과제 목록 |
+| 공개 API | `/api/lms/classes/[id]/grades` | 성적 내보내기 |
+| 문서 | `/api/docs` | Swagger UI |
+| 문서 | `/api/docs/openapi.json` | OpenAPI 3.0 스펙 |
+
+**신규 마이그레이션**: `0014` ~ `0018`
 
 ---
 
@@ -815,3 +834,12 @@ KAKAO_API_KEY=
 - HSK 동적 작문 코퍼스 오류 분류 체계
 - 실용현대한어문법 (刘月华 等著) — RAG 참조 문헌
 - 대외한어교학문법 (齐沪扬 编著) — RAG 참조 문헌
+
+---
+
+## Phase 4 (계획)
+
+- 모바일 앱 (React Native)
+- LTI 1.3 표준 연동
+- 다국어 UI
+- AI 튜터 고도화
