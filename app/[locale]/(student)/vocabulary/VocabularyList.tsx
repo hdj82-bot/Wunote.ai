@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function VocabularyList({ items }: Props) {
+  const t = useTranslations("pages.student.vocabulary");
   const [query, setQuery] = useState("");
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
@@ -52,16 +54,14 @@ export default function VocabularyList({ items }: Props) {
     <div className="space-y-3">
       <Input
         type="search"
-        placeholder="한자·병음·뜻으로 검색"
+        placeholder={t("searchPlaceholder")}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
 
       {filtered.length === 0 ? (
         <p className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
-          {items.length === 0
-            ? "단어장이 비어 있습니다. 오류 기록에서 단어를 추가해보세요."
-            : "검색 결과가 없습니다."}
+          {items.length === 0 ? t("emptyStateNoItems") : t("emptyStateNoSearchResults")}
         </p>
       ) : (
         <ul className="space-y-2">
@@ -74,14 +74,16 @@ export default function VocabularyList({ items }: Props) {
                   {v.korean && <p className="text-sm text-slate-700">{v.korean}</p>}
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] text-slate-500">복습 {v.review_count}회</p>
+                  <p className="text-[10px] text-slate-500">
+                    {t("reviewCount", { count: v.review_count })}
+                  </p>
                   <button
                     type="button"
                     onClick={() => remove(v.id)}
                     disabled={removingIds.has(v.id)}
                     className="mt-1 text-xs text-red-600 hover:underline disabled:opacity-50"
                   >
-                    삭제
+                    {t("delete")}
                   </button>
                 </div>
               </Card>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/supabase'
 import Card from '@/components/ui/Card'
 import { FOSSILIZATION_THRESHOLD } from '@/lib/fossilization'
@@ -153,6 +154,7 @@ function formatDate(iso: string): string {
 }
 
 export default async function DashboardPage() {
+  const t = await getTranslations('pages.professor.dashboard')
   const supabase = createServerClient()
   const {
     data: { user }
@@ -172,47 +174,51 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto w-full max-w-5xl space-y-5 p-4">
       <div className="flex items-baseline justify-between">
-        <h1 className="text-lg font-bold text-slate-900">교수자 대시보드</h1>
+        <h1 className="text-lg font-bold text-slate-900">{t('title')}</h1>
         <Link href="/marketplace" className="text-xs text-indigo-600 hover:underline">
-          마켓플레이스 →
+          {t('marketplace')}
         </Link>
       </div>
 
       <section className="grid gap-3 sm:grid-cols-3">
         <Card className="p-4">
-          <p className="text-xs text-slate-500">운영 수업</p>
-          <p className="mt-1 text-xl font-bold text-slate-900">{classes.length}개</p>
+          <p className="text-xs text-slate-500">{t('statActiveClasses')}</p>
+          <p className="mt-1 text-xl font-bold text-slate-900">
+            {t('statActiveClassesUnit', { count: classes.length })}
+          </p>
           <p className="text-xs text-slate-500">
-            {classes.filter(c => c.is_active).length}개 진행 중
+            {t('statActiveClassesActive', { count: classes.filter(c => c.is_active).length })}
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs text-slate-500">총 수강생</p>
-          <p className="mt-1 text-xl font-bold text-slate-900">{totalStudents}명</p>
+          <p className="text-xs text-slate-500">{t('statTotalStudents')}</p>
+          <p className="mt-1 text-xl font-bold text-slate-900">
+            {t('statPeopleUnit', { count: totalStudents })}
+          </p>
         </Card>
         <Card
           className={`p-4 ${totalFossils > 0 ? 'border-amber-300 bg-amber-50' : ''}`}
         >
-          <p className="text-xs text-slate-500">최근 30일 화석화 경고</p>
+          <p className="text-xs text-slate-500">{t('statFossilRecent30')}</p>
           <p
             className={`mt-1 text-xl font-bold ${totalFossils > 0 ? 'text-amber-700' : 'text-slate-900'}`}
           >
-            {totalFossils}건
+            {t('statFossilUnit', { count: totalFossils })}
           </p>
         </Card>
       </section>
 
       <section className="space-y-2">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-sm font-semibold text-slate-700">수업별 현황</h2>
+          <h2 className="text-sm font-semibold text-slate-700">{t('sectionTitle')}</h2>
           <Link href="/reports" className="text-xs text-indigo-600 hover:underline">
-            주간 리포트 전체 →
+            {t('reportsAll')}
           </Link>
         </div>
 
         {classes.length === 0 ? (
           <p className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-            아직 개설한 수업이 없습니다.
+            {t('emptyClasses')}
           </p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
@@ -234,24 +240,26 @@ export default async function DashboardPage() {
                     </div>
                     {!c.is_active && (
                       <span className="shrink-0 rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                        종료
+                        {t('ended')}
                       </span>
                     )}
                   </div>
 
                   <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
                     <div>
-                      <dt className="text-slate-500">수강생</dt>
-                      <dd className="font-semibold text-slate-800">{studentCount}명</dd>
+                      <dt className="text-slate-500">{t('colStudents')}</dt>
+                      <dd className="font-semibold text-slate-800">
+                        {t('statPeopleUnit', { count: studentCount })}
+                      </dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500">이번 주 세션</dt>
+                      <dt className="text-slate-500">{t('colWeekSessions')}</dt>
                       <dd className="font-semibold text-slate-800">
                         {latest?.metrics?.total_sessions ?? 0}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500">오류</dt>
+                      <dt className="text-slate-500">{t('colErrors')}</dt>
                       <dd className="font-semibold text-slate-800">
                         {latest?.metrics?.total_errors ?? 0}
                       </dd>
@@ -260,29 +268,29 @@ export default async function DashboardPage() {
 
                   {c.current_grammar_focus && (
                     <p className="mt-3 rounded bg-indigo-50 px-2 py-1 text-xs text-indigo-700">
-                      이번 주 포인트: {c.current_grammar_focus}
+                      {t('thisWeekPoint', { focus: c.current_grammar_focus })}
                     </p>
                   )}
 
                   {fossils.length > 0 && (
                     <p className="mt-2 rounded bg-amber-50 px-2 py-1 text-xs text-amber-700">
-                      ⚠ 화석화 위험 {fossils.length}건
+                      {t('fossilWarning', { count: fossils.length })}
                     </p>
                   )}
 
                   {latest && (
                     <div className="mt-3 rounded border border-slate-200 bg-slate-50 p-2">
                       <p className="text-[10px] font-semibold uppercase text-slate-500">
-                        최근 리포트 · {formatDate(latest.week_start)}
+                        {t('recentReport', { date: formatDate(latest.week_start) })}
                       </p>
                       <p className="mt-1 line-clamp-2 text-xs text-slate-700">
-                        {latest.next_class_suggestion || '다음 수업 제안이 비어 있습니다.'}
+                        {latest.next_class_suggestion || t('suggestionEmpty')}
                       </p>
                       <Link
                         href={`/reports/${latest.id}`}
                         className="mt-1 inline-block text-[11px] text-indigo-600 hover:underline"
                       >
-                        자세히 →
+                        {t('detail')}
                       </Link>
                     </div>
                   )}
@@ -292,13 +300,13 @@ export default async function DashboardPage() {
                       href={`/classes/${c.id}`}
                       className="text-indigo-600 hover:underline"
                     >
-                      수강생 현황
+                      {t('studentsLink')}
                     </Link>
                     <Link
                       href={`/classes/${c.id}/corpus`}
                       className="text-indigo-600 hover:underline"
                     >
-                      코퍼스
+                      {t('corpusLink')}
                     </Link>
                     <span className="ml-auto font-mono text-[11px] text-slate-500">
                       {c.invite_code}

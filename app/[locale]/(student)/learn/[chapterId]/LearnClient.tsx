@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import DocumentEditor from "@/components/learn/DocumentEditor";
 import AnnotatedText from "@/components/learn/AnnotatedText";
 import ErrorPanel from "@/components/learn/ErrorPanel";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function LearnClient({ classId, chapterId }: Props) {
+  const t = useTranslations("pages.student.learn");
   const chapterNumber = Number(chapterId);
   const [tab, setTab] = useState<Tab>("doc");
   const [draft, setDraft] = useState("");
@@ -38,14 +40,14 @@ export default function LearnClient({ classId, chapterId }: Props) {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        const msg = (await res.json().catch(() => null))?.error ?? "분석 요청에 실패했습니다.";
+        const msg = (await res.json().catch(() => null))?.error ?? t("analyzeFailedDefault");
         throw new Error(msg);
       }
       const data = (await res.json()) as AnalysisResponse;
       setAnalysis(data);
       setFocusedErrorId(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "알 수 없는 오류가 발생했습니다.");
+      setError(e instanceof Error ? e.message : t("unknownError"));
     } finally {
       setAnalyzing(false);
     }
@@ -61,7 +63,9 @@ export default function LearnClient({ classId, chapterId }: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-slate-100">
       <header className="flex items-center justify-between border-b bg-white px-4 py-2">
-        <h1 className="text-sm font-semibold text-slate-700">제{chapterId}장</h1>
+        <h1 className="text-sm font-semibold text-slate-700">
+          {t("chapterLabel", { chapter: chapterId })}
+        </h1>
         {error && (
           <p role="alert" className="text-xs text-red-600">
             {error}
@@ -76,13 +80,13 @@ export default function LearnClient({ classId, chapterId }: Props) {
           {analysis ? (
             <div className="flex h-full flex-col bg-white">
               <div className="flex items-center justify-between border-b p-3">
-                <h2 className="text-sm font-semibold text-slate-700">분석 결과</h2>
+                <h2 className="text-sm font-semibold text-slate-700">{t("analysisResult")}</h2>
                 <button
                   type="button"
                   onClick={() => setAnalysis(null)}
                   className="text-xs text-indigo-600 hover:underline"
                 >
-                  수정하기 →
+                  {t("editAgain")}
                 </button>
               </div>
               <div className="min-h-0 flex-1 overflow-auto">
@@ -122,24 +126,24 @@ export default function LearnClient({ classId, chapterId }: Props) {
         </section>
       </main>
 
-      <nav className="grid grid-cols-3 border-t bg-white md:hidden" aria-label="뷰 전환">
+      <nav className="grid grid-cols-3 border-t bg-white md:hidden" aria-label={t("tabNavAria")}>
         {(
           [
-            { id: "doc", label: "문서" },
-            { id: "errors", label: "오류" },
-            { id: "chat", label: "채팅" },
+            { id: "doc", label: t("tabDoc") },
+            { id: "errors", label: t("tabErrors") },
+            { id: "chat", label: t("tabChat") },
           ] as const
-        ).map((t) => (
+        ).map((tab2) => (
           <button
-            key={t.id}
+            key={tab2.id}
             type="button"
-            onClick={() => setTab(t.id)}
-            aria-pressed={tab === t.id}
+            onClick={() => setTab(tab2.id)}
+            aria-pressed={tab === tab2.id}
             className={`py-3 text-sm font-medium ${
-              tab === t.id ? "bg-indigo-50 text-indigo-700" : "text-slate-600"
+              tab === tab2.id ? "bg-indigo-50 text-indigo-700" : "text-slate-600"
             }`}
           >
-            {t.label}
+            {tab2.label}
           </button>
         ))}
       </nav>

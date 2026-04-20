@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { AnalysisError } from "@/types";
 
 interface Props {
@@ -14,11 +15,6 @@ interface Props {
   isInVocab?: boolean;
 }
 
-const TYPE_LABEL: Record<AnalysisError["error_type"], string> = {
-  vocab: "어휘",
-  grammar: "문법",
-};
-
 export default function ErrorCard({
   error,
   errorCardId,
@@ -30,9 +26,12 @@ export default function ErrorCard({
   isBookmarked,
   isInVocab,
 }: Props) {
+  const t = useTranslations("pages.components.errorCard");
   const [cotOpen, setCotOpen] = useState(false);
   const isFossilized = (fossilizationCount ?? 0) >= 3;
   const showActions = Boolean(errorCardId && (onBookmark || onAddVocab));
+  const typeLabel =
+    error.error_type === "vocab" ? t("typeVocab") : t("typeGrammar");
 
   return (
     <article
@@ -44,29 +43,29 @@ export default function ErrorCard({
       <header className="flex items-center justify-between border-b px-3 py-2">
         <div className="flex items-center gap-2 text-sm">
           <span className="font-semibold text-red-600">
-            🔴 {TYPE_LABEL[error.error_type]} — {error.error_subtype}
+            🔴 {typeLabel} — {error.error_subtype}
           </span>
           <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">
-            HSK {error.hsk_level}급
+            {t("hskLevel", { level: error.hsk_level })}
           </span>
         </div>
       </header>
 
       <div className="space-y-2 px-3 py-2 text-sm">
-        <Field label="오류 범위">
+        <Field label={t("fieldErrorSpan")}>
           <code className="rounded bg-red-50 px-1.5 py-0.5 text-red-700">{error.error_span}</code>
         </Field>
-        <Field label="수정안">
+        <Field label={t("fieldCorrection")}>
           <code className="rounded bg-green-50 px-1.5 py-0.5 text-green-700">{error.correction}</code>
         </Field>
-        <Field label="설명">
+        <Field label={t("fieldExplanation")}>
           <p className="text-slate-700">{error.explanation}</p>
         </Field>
       </div>
 
       {isFossilized && (
         <div className="mx-3 mb-2 rounded bg-orange-50 px-3 py-2 text-xs text-orange-800">
-          ⚠️ 이 오류가 {fossilizationCount}회 반복되고 있습니다. 화석화 위험.
+          {t("fossilWarning", { count: fossilizationCount ?? 0 })}
         </div>
       )}
 
@@ -80,7 +79,7 @@ export default function ErrorCard({
           className="text-xs font-medium text-indigo-600 hover:underline"
           aria-expanded={cotOpen}
         >
-          📋 판단 근거 (단계적 추론) {cotOpen ? "▴" : "▾"}
+          {t("cotToggle")} {cotOpen ? "▴" : "▾"}
         </button>
         {cotOpen && (
           <ol className="mt-2 space-y-1.5 text-sm">
@@ -96,7 +95,7 @@ export default function ErrorCard({
 
       {error.similar_example && (
         <div className="border-t bg-slate-50 px-3 py-2 text-xs text-slate-600">
-          유사 예시 <span className="ml-2 text-slate-800">{error.similar_example}</span>
+          {t("similarExample")} <span className="ml-2 text-slate-800">{error.similar_example}</span>
         </div>
       )}
 
@@ -112,7 +111,7 @@ export default function ErrorCard({
               disabled={isBookmarked}
               className="rounded border border-slate-300 px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50"
             >
-              {isBookmarked ? "북마크됨 ⭐" : "북마크 ☆"}
+              {isBookmarked ? t("bookmarked") : t("bookmark")}
             </button>
           )}
           {onAddVocab && (
@@ -125,7 +124,7 @@ export default function ErrorCard({
               disabled={isInVocab}
               className="rounded border border-slate-300 px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50"
             >
-              {isInVocab ? "단어장 추가됨" : "단어장 추가 +"}
+              {isInVocab ? t("vocabAdded") : t("vocabAdd")}
             </button>
           )}
         </div>

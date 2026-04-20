@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { createServerClient } from "@/lib/supabase";
 import Card from "@/components/ui/Card";
 import type { ErrorType } from "@/types";
@@ -51,10 +52,14 @@ function bucketByDay(rows: ErrorRow[]): DailyBucket[] {
   return Array.from(buckets, ([date, count]) => ({ date, count }));
 }
 
-function bucketBySubtype(rows: ErrorRow[], limit = 6): SubtypeBucket[] {
+function bucketBySubtype(
+  rows: ErrorRow[],
+  unclassifiedLabel: string,
+  limit = 6
+): SubtypeBucket[] {
   const counts = new Map<string, number>();
   for (const row of rows) {
-    const key = row.error_subtype || "(미분류)";
+    const key = row.error_subtype || unclassifiedLabel;
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   return Array.from(counts, ([subtype, count]) => ({ subtype, count }))
@@ -62,19 +67,27 @@ function bucketBySubtype(rows: ErrorRow[], limit = 6): SubtypeBucket[] {
     .slice(0, limit);
 }
 
-function DailyChart({ buckets }: { buckets: DailyBucket[] }) {
+function DailyChart({
+  buckets,
+  ariaLabel,
+  tooltip,
+}: {
+  buckets: DailyBucket[];
+  ariaLabel: string;
+  tooltip: (date: string, count: number) => string;
+}) {
   const max = Math.max(1, ...buckets.map((b) => b.count));
   return (
     <div
       role="img"
-      aria-label="최근 30일 오류 추이"
+      aria-label={ariaLabel}
       className="grid items-end gap-[2px]"
       style={{ gridTemplateColumns: `repeat(${buckets.length}, 1fr)`, height: "120px" }}
     >
       {buckets.map((b) => (
         <div
           key={b.date}
-          title={`${b.date}: ${b.count}건`}
+          title={tooltip(b.date, b.count)}
           className="relative rounded-t bg-indigo-500/80 hover:bg-indigo-600"
           style={{ height: `${(b.count / max) * 100}%`, minHeight: b.count > 0 ? "2px" : "0" }}
         />
@@ -104,35 +117,42 @@ function SubtypeBars({ buckets }: { buckets: SubtypeBucket[] }) {
 }
 
 export default async function ProgressPage() {
-  const rows = await loadErrors();
+  const [t, rows] = await Promise.all([
+    getTranslations("pages.student.progress"),
+    loadErrors(),
+  ]);
   const total = rows.length;
   const grammar = rows.filter((r) => r.error_type === "grammar").length;
   const vocab = rows.filter((r) => r.error_type === "vocab").length;
   const daily = bucketByDay(rows);
-  const bySubtype = bucketBySubtype(rows);
+  const bySubtype = bucketBySubtype(rows, t("unclassified"));
 
   return (
     <main className="mx-auto w-full max-w-3xl space-y-4 p-4">
-      <h1 className="text-lg font-bold text-slate-900">성장 리포트</h1>
+      <h1 className="text-lg font-bold text-slate-900">{t("title")}</h1>
 
       <div className="grid grid-cols-3 gap-2">
         <Card className="p-3 text-center">
-          <p className="text-xs text-slate-500">최근 30일 오류</p>
+          <p className="text-xs text-slate-500">{t("statRecent30")}</p>
           <p className="text-xl font-bold text-slate-800">{total}</p>
         </Card>
         <Card className="p-3 text-center">
-          <p className="text-xs text-slate-500">문법</p>
+          <p className="text-xs text-slate-500">{t("statGrammar")}</p>
           <p className="text-xl font-bold text-slate-800">{grammar}</p>
         </Card>
         <Card className="p-3 text-center">
-          <p className="text-xs text-slate-500">어휘</p>
+          <p className="text-xs text-slate-500">{t("statVocab")}</p>
           <p className="text-xl font-bold text-slate-800">{vocab}</p>
         </Card>
       </div>
 
       <Card className="space-y-2 p-4">
-        <h2 className="text-sm font-semibold text-slate-700">일별 오류 추이</h2>
-        <DailyChart buckets={daily} />
+        <h2 className="text-sm font-semibold text-slate-700">{t("dailyTitle")}</h2>
+        <DailyChart
+          buckets={daily}
+          ariaLabel={t("chartAriaRecent30")}
+          tooltip={(date, count) => t("chartTooltip", { date, count })}
+        />
         <div className="flex justify-between text-[10px] text-slate-500">
           <span>{daily[0]?.date}</span>
           <span>{daily[daily.length - 1]?.date}</span>
@@ -140,9 +160,9 @@ export default async function ProgressPage() {
       </Card>
 
       <Card className="space-y-3 p-4">
-        <h2 className="text-sm font-semibold text-slate-700">자주 발생하는 오류 유형 TOP 6</h2>
+        <h2 className="text-sm font-semibold text-slate-700">{t("topSubtypesTitle")}</h2>
         {bySubtype.length === 0 ? (
-          <p className="text-sm text-slate-500">아직 데이터가 없습니다.</p>
+          <p className="text-sm text-slate-500">{t("topSubtypesEmpty")}</p>
         ) : (
           <SubtypeBars buckets={bySubtype} />
         )}

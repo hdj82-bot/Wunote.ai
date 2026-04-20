@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createServerClient } from "@/lib/supabase";
 import CardNewsViewer from "@/components/cardnews/CardNewsViewer";
 import SendSelfButton from "./SendSelfButton";
@@ -61,7 +62,10 @@ export default async function CardnewsWeekPage({ params }: Params) {
   const weekStart = decodeURIComponent(params.weekId);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(weekStart)) notFound();
 
-  const record = await loadWeek(weekStart);
+  const [t, record] = await Promise.all([
+    getTranslations("pages.student.cardnews"),
+    loadWeek(weekStart),
+  ]);
   if (!record) notFound();
 
   return (
@@ -72,10 +76,10 @@ export default async function CardnewsWeekPage({ params }: Params) {
             href="/cardnews"
             className="text-[11px] text-slate-500 hover:text-slate-700"
           >
-            ← 카드뉴스 목록
+            {t("backToList")}
           </Link>
           <h1 className="mt-1 text-base font-bold text-slate-900">
-            {record.week_start} 주
+            {t("weekLabel", { date: record.week_start })}
           </h1>
         </div>
         <SendSelfButton weekStart={record.week_start} alreadySent={record.is_sent} />

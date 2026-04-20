@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createServerClient } from '@/lib/supabase'
 import Card from '@/components/ui/Card'
 import { FOSSILIZATION_THRESHOLD } from '@/lib/fossilization'
@@ -60,7 +61,7 @@ async function loadClassInfo(classId: string, userId: string): Promise<ClassInfo
   return (data as ClassInfo | null) ?? null
 }
 
-async function loadStudents(classId: string): Promise<StudentCell[]> {
+async function loadStudents(classId: string, anonymousLabel: string): Promise<StudentCell[]> {
   const supabase = createServerClient()
 
   const { data: enrollments } = await supabase
@@ -73,7 +74,7 @@ async function loadStudents(classId: string): Promise<StudentCell[]> {
     const p = Array.isArray(e.profiles) ? e.profiles[0] : e.profiles
     return {
       id: e.student_id,
-      name: p?.name ?? '익명',
+      name: p?.name ?? anonymousLabel,
       enrolled_at: e.enrolled_at,
       session_count: 0,
       error_count: 0,
@@ -182,6 +183,7 @@ export default async function ClassDetailPage({
 }: {
   params: { classId: string }
 }) {
+  const t = await getTranslations('pages.professor.classDetail')
   const supabase = createServerClient()
   const {
     data: { user }
@@ -191,7 +193,7 @@ export default async function ClassDetailPage({
   const info = await loadClassInfo(params.classId, user.id)
   if (!info) notFound()
 
-  const students = await loadStudents(params.classId)
+  const students = await loadStudents(params.classId, t('nameAnonymous'))
   const activeStudents = students.filter(s => s.session_count > 0).length
   const inactiveStudents = students.length - activeStudents
   const totalSessions = students.reduce((sum, s) => sum + s.session_count, 0)
@@ -202,7 +204,7 @@ export default async function ClassDetailPage({
     <main className="mx-auto w-full max-w-5xl space-y-5 p-4">
       <p className="text-xs text-slate-500">
         <Link href="/dashboard" className="hover:underline">
-          대시보드
+          {t('breadcrumbDashboard')}
         </Link>{' '}
         › {info.name}
       </p>
@@ -215,67 +217,71 @@ export default async function ClassDetailPage({
           </h1>
           {info.current_grammar_focus && (
             <p className="mt-1 text-xs text-indigo-700">
-              이번 주 포인트: {info.current_grammar_focus}
+              {t('thisWeekPoint', { focus: info.current_grammar_focus })}
             </p>
           )}
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="font-mono text-slate-500">초대 {info.invite_code}</span>
+          <span className="font-mono text-slate-500">
+            {t('inviteCode', { code: info.invite_code })}
+          </span>
           <Link href={`/classes/${info.id}/corpus`} className="text-indigo-600 hover:underline">
-            코퍼스
+            {t('corpusLink')}
           </Link>
           <Link href={`/reports?classId=${info.id}`} className="text-indigo-600 hover:underline">
-            리포트
+            {t('reportsLink')}
           </Link>
         </div>
       </header>
 
       <section className="grid gap-3 sm:grid-cols-4">
         <Card className="p-3">
-          <p className="text-xs text-slate-500">수강생</p>
+          <p className="text-xs text-slate-500">{t('statStudents')}</p>
           <p className="mt-1 text-lg font-bold text-slate-900">{students.length}</p>
           <p className="text-[11px] text-slate-500">
-            활동 {activeStudents} · 미활동 {inactiveStudents}
+            {t('statStudentsSub', { active: activeStudents, inactive: inactiveStudents })}
           </p>
         </Card>
         <Card className="p-3">
-          <p className="text-xs text-slate-500">누적 세션</p>
+          <p className="text-xs text-slate-500">{t('statTotalSessions')}</p>
           <p className="mt-1 text-lg font-bold text-slate-900">{totalSessions}</p>
         </Card>
         <Card className="p-3">
-          <p className="text-xs text-slate-500">누적 오류</p>
+          <p className="text-xs text-slate-500">{t('statTotalErrors')}</p>
           <p className="mt-1 text-lg font-bold text-slate-900">{totalErrors}</p>
         </Card>
         <Card className={`p-3 ${fossilStudents > 0 ? 'border-amber-300 bg-amber-50' : ''}`}>
-          <p className="text-xs text-slate-500">화석화 위험 학생</p>
+          <p className="text-xs text-slate-500">{t('statFossilStudents')}</p>
           <p
             className={`mt-1 text-lg font-bold ${
               fossilStudents > 0 ? 'text-amber-700' : 'text-slate-900'
             }`}
           >
-            {fossilStudents}명
+            {t('statPeopleUnit', { count: fossilStudents })}
           </p>
         </Card>
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold text-slate-700">수강생 현황</h2>
+        <h2 className="text-sm font-semibold text-slate-700">{t('sectionStudents')}</h2>
         {students.length === 0 ? (
           <p className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-            아직 등록된 수강생이 없습니다. 초대 코드 {info.invite_code} 로 초대해 보세요.
+            {t('emptyStudents', { code: info.invite_code })}
           </p>
         ) : (
           <Card className="overflow-x-auto">
             <table className="min-w-full text-xs">
               <thead className="bg-slate-50 text-slate-500">
                 <tr>
-                  <th className="px-3 py-2 text-left font-medium">학생</th>
-                  <th className="px-3 py-2 text-right font-medium">세션</th>
-                  <th className="px-3 py-2 text-right font-medium">오류</th>
-                  <th className="px-3 py-2 text-left font-medium">최다 오류</th>
-                  <th className="px-3 py-2 text-right font-medium">개선율</th>
-                  <th className="px-3 py-2 text-left font-medium">화석화</th>
-                  <th className="px-3 py-2 text-left font-medium">마지막 활동</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('thStudent')}</th>
+                  <th className="px-3 py-2 text-right font-medium">{t('thSessions')}</th>
+                  <th className="px-3 py-2 text-right font-medium">{t('thErrors')}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('thTopSubtype')}</th>
+                  <th className="px-3 py-2 text-right font-medium">
+                    {t('thImprovementRate')}
+                  </th>
+                  <th className="px-3 py-2 text-left font-medium">{t('thFossilization')}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('thLastActive')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -293,7 +299,7 @@ export default async function ClassDetailPage({
                     <td className="px-3 py-2">
                       {s.fossilization_count > 0 ? (
                         <span className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-700">
-                          {s.fossilization_count}회
+                          {t('fossilCountSuffix', { count: s.fossilization_count })}
                         </span>
                       ) : (
                         <span className="text-slate-400">—</span>
