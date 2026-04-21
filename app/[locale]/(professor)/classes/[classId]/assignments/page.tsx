@@ -1,44 +1,46 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { createServerClient } from "@/lib/supabase";
-import { listAssignmentsForClass, listMyRubrics } from "@/lib/assignments";
-import AssignmentList from "./AssignmentList";
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
+import { createServerClient } from '@/lib/supabase'
+import { listAssignmentsForClass, listMyRubrics } from '@/lib/assignments'
+import AssignmentList from './AssignmentList'
 
 interface ClassRow {
-  id: string;
-  name: string;
-  semester: string;
+  id: string
+  name: string
+  semester: string
 }
 
 async function loadClass(classId: string, userId: string): Promise<ClassRow | null> {
-  const supabase = createServerClient();
+  const supabase = createServerClient()
   const { data } = await supabase
-    .from("classes")
-    .select("id, name, semester")
-    .eq("id", classId)
-    .eq("professor_id", userId)
-    .maybeSingle();
-  return (data as ClassRow | null) ?? null;
+    .from('classes')
+    .select('id, name, semester')
+    .eq('id', classId)
+    .eq('professor_id', userId)
+    .maybeSingle()
+  return (data as ClassRow | null) ?? null
 }
 
 export default async function AssignmentsPage({
   params,
 }: {
-  params: { classId: string };
+  params: { classId: string }
 }) {
-  const supabase = createServerClient();
+  const t = await getTranslations('pages.professor.assignments')
+  const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  } = await supabase.auth.getUser()
+  if (!user) return null
 
-  const classInfo = await loadClass(params.classId, user.id);
-  if (!classInfo) notFound();
+  const classInfo = await loadClass(params.classId, user.id)
+  if (!classInfo) notFound()
 
   const [assignments, rubrics] = await Promise.all([
     listAssignmentsForClass(params.classId),
     listMyRubrics(user.id),
-  ]);
+  ])
 
   return (
     <main className="mx-auto w-full max-w-4xl space-y-5 p-4">
@@ -46,12 +48,12 @@ export default async function AssignmentsPage({
         <div>
           <p className="text-xs text-slate-500">
             <Link href="/dashboard" className="hover:underline">
-              대시보드
-            </Link>{" "}
-            › 과제
+              {t('breadcrumbDashboard')}
+            </Link>{' '}
+            › {t('breadcrumbAssignments')}
           </p>
           <h1 className="text-lg font-bold text-slate-900">
-            {classInfo.name}{" "}
+            {classInfo.name}{' '}
             <span className="text-sm font-normal text-slate-500">({classInfo.semester})</span>
           </h1>
         </div>
@@ -59,7 +61,7 @@ export default async function AssignmentsPage({
           href={`/classes/${classInfo.id}/rubrics`}
           className="text-xs text-indigo-600 hover:underline"
         >
-          루브릭 관리 →
+          {t('rubricsLink')}
         </Link>
       </div>
 
@@ -69,5 +71,5 @@ export default async function AssignmentsPage({
         rubrics={rubrics}
       />
     </main>
-  );
+  )
 }

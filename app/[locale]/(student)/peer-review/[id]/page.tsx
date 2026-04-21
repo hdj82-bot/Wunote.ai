@@ -2,11 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import type { ReviewDetail } from '@/types/peer-review'
-
-// ──────────────────────────────────────────────────────────────
-// Score button row (1–5)
-// ──────────────────────────────────────────────────────────────
 
 function ScoreSelect({
   label,
@@ -45,11 +42,8 @@ function ScoreSelect({
   )
 }
 
-// ──────────────────────────────────────────────────────────────
-// Page
-// ──────────────────────────────────────────────────────────────
-
 export default function PeerReviewFormPage() {
+  const t = useTranslations('pages.student.peerReviewForm')
   const params   = useParams()
   const router   = useRouter()
   const reviewId = params?.id as string
@@ -68,7 +62,6 @@ export default function PeerReviewFormPage() {
   const [contentScore,  setContentScore]  = useState(0)
   const [overallScore,  setOverallScore]  = useState(0)
 
-  // 초기 데이터 로드
   useEffect(() => {
     if (!reviewId) return
     fetch(`/api/peer-review/${reviewId}`)
@@ -83,11 +76,10 @@ export default function PeerReviewFormPage() {
         setContentScore(d.content_score  ?? 0)
         setOverallScore(d.overall_score  ?? 0)
       })
-      .catch(() => setLoadError('리뷰를 불러오지 못했습니다'))
+      .catch(() => setLoadError(t('loadFailed')))
       .finally(() => setLoading(false))
-  }, [reviewId])
+  }, [reviewId, t])
 
-  // 임시 저장
   const handleSave = useCallback(async () => {
     setFormError(null)
     setSaving(true)
@@ -108,21 +100,20 @@ export default function PeerReviewFormPage() {
       setSavedMsg(true)
       setTimeout(() => setSavedMsg(false), 2000)
     } catch {
-      setFormError('임시 저장에 실패했습니다')
+      setFormError(t('saveDraft') + ' ' + t('loadFailed'))
     } finally {
       setSaving(false)
     }
-  }, [reviewId, feedbackText, grammarScore, vocabScore, contentScore, overallScore])
+  }, [reviewId, feedbackText, grammarScore, vocabScore, contentScore, overallScore, t])
 
-  // 최종 제출
   const handleSubmit = useCallback(async () => {
     setFormError(null)
     if (!grammarScore || !vocabScore || !contentScore || !overallScore) {
-      setFormError('모든 점수 항목을 선택해주세요')
+      setFormError(t('validationScores'))
       return
     }
     if (!feedbackText.trim()) {
-      setFormError('피드백 내용을 입력해주세요')
+      setFormError(t('validationFeedback'))
       return
     }
     setSubmitting(true)
@@ -144,18 +135,16 @@ export default function PeerReviewFormPage() {
       if (body.error) { setFormError(body.error); return }
       router.push('/peer-review')
     } catch {
-      setFormError('제출에 실패했습니다')
+      setFormError(t('loadFailed'))
     } finally {
       setSubmitting(false)
     }
-  }, [reviewId, feedbackText, grammarScore, vocabScore, contentScore, overallScore, router])
-
-  // ── 로딩 / 에러 상태 ───────────────────────────────────────
+  }, [reviewId, feedbackText, grammarScore, vocabScore, contentScore, overallScore, router, t])
 
   if (loading) {
     return (
       <main className="mx-auto w-full max-w-3xl p-4">
-        <p className="text-sm text-slate-500">불러오는 중...</p>
+        <p className="text-sm text-slate-500">{t('loading')}</p>
       </main>
     )
   }
@@ -163,7 +152,7 @@ export default function PeerReviewFormPage() {
   if (loadError || !detail) {
     return (
       <main className="mx-auto w-full max-w-3xl p-4">
-        <p className="text-sm text-red-600">{loadError ?? '리뷰를 찾을 수 없습니다'}</p>
+        <p className="text-sm text-red-600">{loadError ?? t('notFound')}</p>
       </main>
     )
   }
@@ -172,67 +161,40 @@ export default function PeerReviewFormPage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl space-y-5 p-4">
-      {/* 헤더 */}
       <div>
-        <h1 className="text-lg font-bold text-slate-900">동료 피드백 작성</h1>
+        <h1 className="text-lg font-bold text-slate-900">{t('formTitle')}</h1>
         <p className="text-sm text-slate-500">{detail.assignment_title}</p>
       </div>
 
-      {/* 과제 안내 */}
       {detail.prompt_text && (
         <section className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-          <p className="mb-1 text-xs font-semibold text-slate-500">과제 안내</p>
+          <p className="mb-1 text-xs font-semibold text-slate-500">{t('promptLabel')}</p>
           <p className="whitespace-pre-wrap text-sm text-slate-700">{detail.prompt_text}</p>
         </section>
       )}
 
-      {/* 제출 글 — 리뷰이 신원 비공개 */}
       <section className="rounded-lg border border-slate-200 bg-white p-3">
-        <p className="mb-1 text-xs font-semibold text-slate-500">제출 글 (익명)</p>
+        <p className="mb-1 text-xs font-semibold text-slate-500">{t('draftLabel')}</p>
         {detail.draft_text ? (
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
             {detail.draft_text}
           </p>
         ) : (
-          <p className="text-sm text-slate-400">제출 내용을 불러올 수 없습니다.</p>
+          <p className="text-sm text-slate-400">{t('draftMissing')}</p>
         )}
       </section>
 
-      {/* 평가 폼 */}
       <section className="space-y-4 rounded-lg border border-slate-200 bg-white p-4">
-        <p className="text-sm font-semibold text-slate-700">평가 항목 (각 1 – 5점)</p>
+        <p className="text-sm font-semibold text-slate-700">{t('scoresHeading')}</p>
 
-        <ScoreSelect
-          label="문법 (Grammar)"
-          value={grammarScore}
-          onChange={setGrammarScore}
-          disabled={isCompleted}
-        />
-        <ScoreSelect
-          label="어휘 (Vocabulary)"
-          value={vocabScore}
-          onChange={setVocabScore}
-          disabled={isCompleted}
-        />
-        <ScoreSelect
-          label="내용 (Content)"
-          value={contentScore}
-          onChange={setContentScore}
-          disabled={isCompleted}
-        />
-        <ScoreSelect
-          label="종합 (Overall)"
-          value={overallScore}
-          onChange={setOverallScore}
-          disabled={isCompleted}
-        />
+        <ScoreSelect label={t('grammarLabel')} value={grammarScore} onChange={setGrammarScore} disabled={isCompleted} />
+        <ScoreSelect label={t('vocabLabel')}   value={vocabScore}   onChange={setVocabScore}   disabled={isCompleted} />
+        <ScoreSelect label={t('contentLabel')} value={contentScore} onChange={setContentScore} disabled={isCompleted} />
+        <ScoreSelect label={t('overallLabel')} value={overallScore} onChange={setOverallScore} disabled={isCompleted} />
 
         <div className="space-y-1">
-          <label
-            htmlFor="feedback-text"
-            className="text-sm font-semibold text-slate-700"
-          >
-            피드백
+          <label htmlFor="feedback-text" className="text-sm font-semibold text-slate-700">
+            {t('feedbackLabel')}
           </label>
           <textarea
             id="feedback-text"
@@ -240,7 +202,7 @@ export default function PeerReviewFormPage() {
             onChange={(e) => setFeedbackText(e.target.value)}
             disabled={isCompleted}
             rows={5}
-            placeholder="구체적이고 건설적인 피드백을 작성해주세요..."
+            placeholder={t('feedbackPlaceholder')}
             className="w-full rounded border border-slate-300 p-2 text-sm text-slate-700
               placeholder-slate-400 focus:border-indigo-400 focus:outline-none
               disabled:bg-slate-50 disabled:opacity-70"
@@ -248,7 +210,7 @@ export default function PeerReviewFormPage() {
         </div>
 
         {formError && <p className="text-sm text-red-600">{formError}</p>}
-        {savedMsg  && <p className="text-sm text-green-600">임시 저장됐습니다.</p>}
+        {savedMsg  && <p className="text-sm text-green-600">{t('savedMsg')}</p>}
 
         {!isCompleted ? (
           <div className="flex gap-2">
@@ -259,7 +221,7 @@ export default function PeerReviewFormPage() {
               className="rounded border border-slate-300 px-4 py-2 text-sm font-medium
                 text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
             >
-              {saving ? '저장 중...' : '임시 저장'}
+              {saving ? t('saving') : t('saveDraft')}
             </button>
             <button
               type="button"
@@ -268,12 +230,12 @@ export default function PeerReviewFormPage() {
               className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white
                 transition hover:bg-indigo-700 disabled:opacity-50"
             >
-              {submitting ? '제출 중...' : '리뷰 제출'}
+              {submitting ? t('submitting') : t('submitReview')}
             </button>
           </div>
         ) : (
           <div className="rounded bg-green-50 p-3 text-sm text-green-700">
-            이 리뷰는 이미 제출 완료되었습니다.
+            {t('completedMsg')}
           </div>
         )}
       </section>

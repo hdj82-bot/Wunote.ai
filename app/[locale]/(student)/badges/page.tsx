@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { createServerClient } from "@/lib/supabase";
 import BadgeDisplay, { type BadgeDisplayItem } from "@/components/gamification/BadgeDisplay";
 
@@ -30,16 +31,19 @@ async function loadEarned(): Promise<Set<string>> {
 }
 
 export default async function BadgesPage() {
-  const earned = await loadEarned();
+  const [t, earned] = await Promise.all([
+    getTranslations("pages.student.badges"),
+    loadEarned(),
+  ]);
   const items: BadgeDisplayItem[] = CATALOG.map((b) => ({ ...b, earned: earned.has(b.id) }));
   const earnedCount = items.filter((b) => b.earned).length;
 
   return (
     <section className="mx-auto w-full max-w-3xl space-y-4 p-4">
       <div className="flex items-baseline justify-between">
-        <h1 className="text-lg font-bold text-slate-900">배지 진열장</h1>
+        <h1 className="text-lg font-bold text-slate-900">{t("title")}</h1>
         <p className="text-xs text-slate-500">
-          {earnedCount} / {CATALOG.length}
+          {t("countLabel", { earned: earnedCount, total: CATALOG.length })}
         </p>
       </div>
       <BadgeDisplay badges={items} />

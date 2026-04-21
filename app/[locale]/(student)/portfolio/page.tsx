@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { getAuthContext } from '@/lib/auth'
 import { assemblePortfolio } from '@/lib/portfolio'
 import { redirect } from 'next/navigation'
@@ -6,37 +7,26 @@ import type { PortfolioData } from '@/types/portfolio'
 
 function formatDate(iso: string) {
   if (!iso) return '-'
-  return new Date(iso).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
-
-function LevelBadge({ level }: { level: number }) {
-  const labels = ['Beginner', 'Intermediate', 'Advanced', 'Expert']
-  return (
-    <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">
-      {labels[level] ?? `Level ${level}`}
-    </span>
-  )
-}
-
-function StatCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="bg-white border rounded-lg p-4 text-center">
-      <p className="text-2xl font-bold text-gray-800">{value}</p>
-      <p className="text-sm text-gray-500 mt-1">{label}</p>
-    </div>
-  )
+  const d = new Date(iso)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 export default async function PortfolioPage() {
   const auth = await getAuthContext()
   if (!auth) redirect('/login')
 
-  const data: PortfolioData = await assemblePortfolio(auth.userId)
+  const [t, data] = await Promise.all([
+    getTranslations('pages.student.portfolio'),
+    assemblePortfolio(auth.userId) as Promise<PortfolioData>,
+  ])
 
+  const levelLabels = [
+    t('levelBeginner'),
+    t('levelIntermediate'),
+    t('levelAdvanced'),
+    t('levelExpert'),
+  ]
+  const levelLabel = levelLabels[data.gamification.level] ?? t('levelFallback', { level: data.gamification.level })
   const maxErrorCount = Math.max(...data.errorStats.map((e) => e.count), 1)
 
   return (
@@ -49,14 +39,16 @@ export default async function PortfolioPage() {
         }
       `}</style>
 
-      <div className="max-w-4xl mx-auto p-6 space-y-8">
-        {/* Header */}
+      <div className="mx-auto w-full max-w-4xl space-y-8 p-6">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Learning Portfolio</h1>
-            <p className="text-gray-500 mt-1">{data.student.email ?? 'Student'}</p>
-            <p className="text-xs text-gray-400 mt-0.5">
-              Generated {formatDate(data.generatedAt)} · Joined {formatDate(data.student.joined_at)}
+            <h1 className="text-3xl font-bold text-slate-900">{t('title')}</h1>
+            <p className="mt-1 text-slate-500">{data.student.email ?? 'Student'}</p>
+            <p className="mt-0.5 text-xs text-slate-400">
+              {t('generatedAt', {
+                generatedAt: formatDate(data.generatedAt),
+                joinedAt: formatDate(data.student.joined_at),
+              })}
             </p>
           </div>
           <div className="flex flex-col items-end gap-2 print:hidden">
@@ -64,44 +56,55 @@ export default async function PortfolioPage() {
           </div>
         </div>
 
-        {/* Summary Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-          <StatCard label="Level" value={<LevelBadge level={data.gamification.level} /> as any} />
-          <StatCard label="Total XP" value={data.gamification.xp.toLocaleString()} />
-          <StatCard label="Streak" value={`${data.gamification.streak_days}d`} />
-          <StatCard label="Sessions" value={data.totalSessions} />
-          <StatCard label="Vocabulary" value={data.vocabularyCount} />
-          <StatCard label="Badges" value={data.badgesEarned.length} />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
+          {[
+            { label: t('statLevel'), value: levelLabel },
+            { label: t('statXP'), value: data.gamification.xp.toLocaleString() },
+            { label: t('statStreak'), value: `${data.gamification.streak_days}d` },
+            { label: t('statSessions'), value: data.totalSessions },
+            { label: t('statVocab'), value: data.vocabularyCount },
+            { label: t('statBadges'), value: data.badgesEarned.length },
+          ].map(({ label, value }) => (
+            <div key={label} className="rounded-lg border border-slate-200 bg-white p-4 text-center">
+              <p className="text-2xl font-bold text-slate-800">{value}</p>
+              <p className="mt-1 text-sm text-slate-500">{label}</p>
+            </div>
+          ))}
         </div>
 
-        {/* Top Writing Samples */}
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Top Writing Samples</h2>
+          <h2 className="mb-4 text-xl font-semibold text-slate-800">{t('writingSamplesTitle')}</h2>
           {data.topSessions.length === 0 ? (
-            <p className="text-gray-400 text-sm">No completed sessions yet.</p>
+            <p className="text-sm text-slate-400">{t('noSessions')}</p>
           ) : (
             <div className="space-y-4">
               {data.topSessions.map((session, i) => (
-                <div key={session.id} className="border rounded-lg p-4 bg-white">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600">
-                      #{i + 1} · Chapter {session.chapter_number} · {formatDate(session.created_at)}
+                <div key={session.id} className="rounded-lg border border-slate-200 bg-white p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-medium text-slate-600">
+                      {t('sessionLabel', {
+                        rank: i + 1,
+                        chapter: session.chapter_number,
+                        date: formatDate(session.created_at),
+                      })}
                     </span>
                     <div className="flex items-center gap-3 text-sm">
                       {session.score !== undefined && (
                         <span className="font-semibold text-green-700">
-                          Score: {session.score}
+                          {t('scoreLabel', { score: session.score })}
                         </span>
                       )}
-                      <span className="text-red-500">{session.error_count} errors</span>
+                      <span className="text-red-500">
+                        {t('errorsLabel', { count: session.error_count })}
+                      </span>
                     </div>
                   </div>
-                  <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
+                  <p className="line-clamp-3 text-sm leading-relaxed text-slate-700">
                     {session.draft_text.slice(0, 300)}
                     {session.draft_text.length > 300 ? '…' : ''}
                   </p>
                   {session.feedback && (
-                    <p className="mt-2 text-xs text-gray-500 italic border-t pt-2">
+                    <p className="mt-2 border-t pt-2 text-xs italic text-slate-500">
                       {session.feedback}
                     </p>
                   )}
@@ -111,28 +114,27 @@ export default async function PortfolioPage() {
           )}
         </section>
 
-        {/* Error Analysis */}
         <section>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Error Analysis
-            <span className="ml-2 text-sm font-normal text-gray-400">
-              {data.totalErrors} total
+          <h2 className="mb-4 text-xl font-semibold text-slate-800">
+            {t('errorAnalysisTitle')}
+            <span className="ml-2 text-sm font-normal text-slate-400">
+              {t('totalErrors', { total: data.totalErrors })}
             </span>
           </h2>
           {data.errorStats.length === 0 ? (
-            <p className="text-gray-400 text-sm">No errors recorded yet.</p>
+            <p className="text-sm text-slate-400">{t('noErrors')}</p>
           ) : (
-            <div className="space-y-2 bg-white border rounded-lg p-4">
+            <div className="space-y-2 rounded-lg border border-slate-200 bg-white p-4">
               {data.errorStats.map((stat) => (
                 <div key={stat.type} className="flex items-center gap-3">
-                  <span className="w-28 text-sm text-gray-600 capitalize">{stat.type}</span>
-                  <div className="flex-1 bg-gray-100 rounded-full h-2.5">
+                  <span className="w-28 capitalize text-sm text-slate-600">{stat.type}</span>
+                  <div className="h-2.5 flex-1 rounded-full bg-slate-100">
                     <div
-                      className="bg-blue-500 h-2.5 rounded-full"
+                      className="h-2.5 rounded-full bg-indigo-500"
                       style={{ width: `${(stat.count / maxErrorCount) * 100}%` }}
                     />
                   </div>
-                  <span className="w-8 text-right text-sm font-medium text-gray-700">
+                  <span className="w-8 text-right text-sm font-medium text-slate-700">
                     {stat.count}
                   </span>
                 </div>
@@ -141,30 +143,28 @@ export default async function PortfolioPage() {
           )}
         </section>
 
-        {/* Badges */}
         {data.badgesEarned.length > 0 && (
           <section>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Badges Earned</h2>
+            <h2 className="mb-4 text-xl font-semibold text-slate-800">{t('badgesTitle')}</h2>
             <div className="flex flex-wrap gap-2">
               {data.badgesEarned.map((badge, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-full px-4 py-1.5 text-sm"
+                  className="flex items-center gap-2 rounded-full border border-yellow-200 bg-yellow-50 px-4 py-1.5 text-sm"
                 >
                   <span className="text-yellow-500">★</span>
                   <span className="font-medium text-yellow-800">{badge.badge_name}</span>
-                  <span className="text-yellow-500 text-xs">{formatDate(badge.earned_at)}</span>
+                  <span className="text-xs text-yellow-500">{formatDate(badge.earned_at)}</span>
                 </div>
               ))}
             </div>
           </section>
         )}
 
-        {/* Goals Progress */}
         {data.goalsProgress.length > 0 && (
           <section>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Learning Goals</h2>
-            <div className="space-y-3 bg-white border rounded-lg p-4">
+            <h2 className="mb-4 text-xl font-semibold text-slate-800">{t('goalsTitle')}</h2>
+            <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
               {data.goalsProgress.map((goal, i) => {
                 const pct = Math.min(
                   Math.round((goal.current_value / Math.max(goal.target_value, 1)) * 100),
@@ -172,15 +172,19 @@ export default async function PortfolioPage() {
                 )
                 return (
                   <div key={i}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-700">{goal.goal}</span>
-                      <span className="text-gray-500">
-                        {goal.current_value} / {goal.target_value} ({pct}%)
+                    <div className="mb-1 flex justify-between text-sm">
+                      <span className="text-slate-700">{goal.goal}</span>
+                      <span className="text-slate-500">
+                        {t('goalProgress', {
+                          current: goal.current_value,
+                          target: goal.target_value,
+                          pct,
+                        })}
                       </span>
                     </div>
-                    <div className="bg-gray-100 rounded-full h-2">
+                    <div className="h-2 rounded-full bg-slate-100">
                       <div
-                        className="bg-green-500 h-2 rounded-full transition-all"
+                        className="h-2 rounded-full bg-green-500 transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -191,9 +195,8 @@ export default async function PortfolioPage() {
           </section>
         )}
 
-        {/* Footer */}
-        <div className="text-center text-xs text-gray-300 pt-4 border-t">
-          Wunote.ai · {formatDate(data.generatedAt)}
+        <div className="border-t pt-4 text-center text-xs text-slate-300">
+          {t('generatedFooter', { date: formatDate(data.generatedAt) })}
         </div>
       </div>
     </>

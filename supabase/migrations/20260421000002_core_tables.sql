@@ -1,8 +1,69 @@
--- Wunote Phase 1 initial schema
--- Covers all tables defined in Wunote.md "DB 스키마" section.
--- Author: window 3 (DB/Auth/Infra)
+-- Wunote.ai — core tables + helper functions
+-- Covers: profiles, classes, enrollments, corpus_documents, chapter_prompts,
+--         sessions, error_cards, bookmarks, vocabulary, quiz_results,
+--         translation_logs, url_analysis_logs
+-- Also defines the RLS helper functions used by later migrations.
 
-create extension if not exists "pgcrypto";
+-- ============================================================
+-- RLS helper functions (placed here so storage + later migrations can reference them)
+-- ============================================================
+create or replace function public.is_professor()
+returns boolean
+language sql stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'professor'
+  );
+$$;
+
+create or replace function public.is_enrolled(p_class_id uuid)
+returns boolean
+language sql stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.enrollments
+    where class_id = p_class_id and student_id = auth.uid()
+  );
+$$;
+
+create or replace function public.owns_class(p_class_id uuid)
+returns boolean
+language sql stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.classes
+    where id = p_class_id and professor_id = auth.uid()
+  );
+$$;
+
+create or replace function public.owns_session_class(p_session_id uuid)
+returns boolean
+language sql stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.sessions s
+    join public.classes c on c.id = s.class_id
+    where s.id = p_session_id and c.professor_id = auth.uid()
+  );
+$$;
+
+-- helper used by storage RLS: derive class_id from corpus file path first segment
+create or replace function public.corpus_class_id(p_name text)
+returns uuid
+language sql immutable
+as $$
+  select nullif((storage.foldername(p_name))[1], '')::uuid;
+$$;
 
 -- ============================================================
 -- 1. profiles — mirrors auth.users, holds role + UI prefs
@@ -22,7 +83,6 @@ create table if not exists public.profiles (
 );
 
 -- Auto-create a profile row when a new auth user signs up.
--- role/name are pulled from raw_user_meta_data set by the signup server action.
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -70,7 +130,7 @@ create table if not exists public.enrollments (
 );
 
 -- ============================================================
--- 3. corpus_documents (RAG)
+-- 3. corpus_documents (RAG + marketplace)
 -- ============================================================
 create table if not exists public.corpus_documents (
   id             uuid primary key default gen_random_uuid(),
@@ -79,10 +139,17 @@ create table if not exists public.corpus_documents (
   file_name      text not null,
   file_type      text not null check (file_type in ('pdf', 'txt', 'docx')),
   content        text not null,
+  title          text,
+  description    text,
   is_public      boolean not null default false,
   download_count int not null default 0,
+  avg_rating     numeric(3,2) not null default 0,
+  rating_count   int not null default 0,
   created_at     timestamptz not null default now()
 );
+
+-- backfill title from file_name for any pre-existing rows
+update public.corpus_documents set title = file_name where title is null;
 
 -- ============================================================
 -- 4. chapter_prompts
@@ -98,32 +165,7 @@ create table if not exists public.chapter_prompts (
 );
 
 -- ============================================================
--- 5. rubrics (defined before assignments/sessions due to FK)
--- ============================================================
-create table if not exists public.rubrics (
-  id           uuid primary key default gen_random_uuid(),
-  professor_id uuid not null references public.profiles(id) on delete cascade,
-  name         text not null,
-  criteria     jsonb not null default '[]'::jsonb,
-  created_at   timestamptz not null default now()
-);
-
--- ============================================================
--- 6. assignments
--- ============================================================
-create table if not exists public.assignments (
-  id           uuid primary key default gen_random_uuid(),
-  class_id     uuid not null references public.classes(id) on delete cascade,
-  professor_id uuid not null references public.profiles(id) on delete cascade,
-  title        text not null,
-  prompt_text  text not null,
-  due_date     timestamptz,
-  rubric_id    uuid references public.rubrics(id) on delete set null,
-  created_at   timestamptz not null default now()
-);
-
--- ============================================================
--- 7. sessions (learning sessions)
+-- 5. sessions (learning sessions)
 -- ============================================================
 create table if not exists public.sessions (
   id                     uuid primary key default gen_random_uuid(),
@@ -134,12 +176,12 @@ create table if not exists public.sessions (
   revision_text          text,
   draft_error_count      int,
   revision_error_count   int,
-  assignment_id          uuid references public.assignments(id) on delete set null,
+  assignment_id          uuid, -- FK to assignments added after that table is created
   created_at             timestamptz not null default now()
 );
 
 -- ============================================================
--- 8. error_cards (핵심 개인 DB)
+-- 6. error_cards (핵심 개인 오류 DB)
 -- ============================================================
 create table if not exists public.error_cards (
   id                   uuid primary key default gen_random_uuid(),
@@ -160,7 +202,7 @@ create table if not exists public.error_cards (
 );
 
 -- ============================================================
--- 9. bookmarks
+-- 7. bookmarks
 -- ============================================================
 create table if not exists public.bookmarks (
   id             uuid primary key default gen_random_uuid(),
@@ -172,7 +214,7 @@ create table if not exists public.bookmarks (
 );
 
 -- ============================================================
--- 10. vocabulary
+-- 8. vocabulary
 -- ============================================================
 create table if not exists public.vocabulary (
   id               uuid primary key default gen_random_uuid(),
@@ -187,7 +229,7 @@ create table if not exists public.vocabulary (
 );
 
 -- ============================================================
--- 11. quiz_results
+-- 9. quiz_results
 -- ============================================================
 create table if not exists public.quiz_results (
   id             uuid primary key default gen_random_uuid(),
@@ -198,7 +240,7 @@ create table if not exists public.quiz_results (
 );
 
 -- ============================================================
--- 12. translation_logs
+-- 10. translation_logs
 -- ============================================================
 create table if not exists public.translation_logs (
   id               uuid primary key default gen_random_uuid(),
@@ -212,7 +254,7 @@ create table if not exists public.translation_logs (
 );
 
 -- ============================================================
--- 13. url_analysis_logs
+-- 11. url_analysis_logs
 -- ============================================================
 create table if not exists public.url_analysis_logs (
   id               uuid primary key default gen_random_uuid(),
@@ -225,90 +267,52 @@ create table if not exists public.url_analysis_logs (
 );
 
 -- ============================================================
--- 14. badges
+-- 12. push_subscriptions (Web Push)
 -- ============================================================
-create table if not exists public.badges (
-  id          uuid primary key default gen_random_uuid(),
-  student_id  uuid not null references public.profiles(id) on delete cascade,
-  badge_type  text not null,
-  badge_name  text not null,
-  badge_icon  text,
-  earned_at   timestamptz not null default now(),
-  unique (student_id, badge_type)
-);
-
--- ============================================================
--- 15. gamification_stats
--- ============================================================
-create table if not exists public.gamification_stats (
-  id                uuid primary key default gen_random_uuid(),
-  student_id        uuid not null unique references public.profiles(id) on delete cascade,
-  level             int  not null default 1,
-  xp                int  not null default 0,
-  streak_days       int  not null default 0,
-  last_active_date  date,
-  updated_at        timestamptz not null default now()
-);
-
--- ============================================================
--- 16. learning_goals
--- ============================================================
-create table if not exists public.learning_goals (
-  id             uuid primary key default gen_random_uuid(),
-  student_id     uuid not null references public.profiles(id) on delete cascade,
-  class_id       uuid references public.classes(id) on delete set null,
-  goal_type      text not null check (goal_type in ('error_type', 'error_count', 'vocab_count')),
-  target_value   text not null,
-  current_value  int  not null default 0,
-  deadline       date,
-  is_achieved    boolean not null default false,
-  created_at     timestamptz not null default now()
-);
-
--- ============================================================
--- 17. rubric_evaluations
--- ============================================================
-create table if not exists public.rubric_evaluations (
+create table if not exists public.push_subscriptions (
   id           uuid primary key default gen_random_uuid(),
-  session_id   uuid not null references public.sessions(id) on delete cascade,
-  rubric_id    uuid not null references public.rubrics(id) on delete cascade,
-  scores       jsonb not null default '[]'::jsonb,
-  total_score  numeric,
-  ai_feedback  text,
-  created_at   timestamptz not null default now()
+  student_id   uuid not null references public.profiles(id) on delete cascade,
+  endpoint     text not null,
+  subscription jsonb not null,
+  created_at   timestamptz not null default now(),
+  unique (student_id, endpoint)
 );
 
 -- ============================================================
--- 18. weekly_cardnews
+-- 13. pronunciation_sessions
 -- ============================================================
-create table if not exists public.weekly_cardnews (
-  id             uuid primary key default gen_random_uuid(),
-  student_id     uuid not null references public.profiles(id) on delete cascade,
-  class_id       uuid references public.classes(id) on delete set null,
-  week_start     date not null,
-  card1_data     jsonb not null default '{}'::jsonb,
-  card2_data     jsonb not null default '{}'::jsonb,
-  card3_data     jsonb not null default '{}'::jsonb,
-  card4_data     jsonb not null default '{}'::jsonb,
-  goal_progress  jsonb not null default '{}'::jsonb,
-  is_sent        boolean not null default false,
-  created_at     timestamptz not null default now(),
-  unique (student_id, week_start)
+create table if not exists public.pronunciation_sessions (
+  id              uuid        primary key default gen_random_uuid(),
+  student_id      uuid        not null references public.profiles(id) on delete cascade,
+  target_text     text        not null,
+  recognized_text text        not null,
+  accuracy_score  integer     not null check (accuracy_score between 0 and 100),
+  errors          jsonb       not null default '[]'::jsonb,
+  language        text        not null check (language in ('en-US', 'ko-KR')),
+  created_at      timestamptz not null default now()
 );
 
 -- ============================================================
--- 19. professor_reports
+-- 14. notification_settings (Kakao + email/push prefs)
 -- ============================================================
-create table if not exists public.professor_reports (
-  id                     uuid primary key default gen_random_uuid(),
-  professor_id           uuid not null references public.profiles(id) on delete cascade,
-  class_id               uuid not null references public.classes(id) on delete cascade,
-  week_start             date not null,
-  focus_points           jsonb not null default '[]'::jsonb,
-  praise_students        jsonb not null default '[]'::jsonb,
-  care_students          jsonb not null default '[]'::jsonb,
-  fossilization_alerts   jsonb not null default '[]'::jsonb,
-  next_class_suggestion  text,
-  created_at             timestamptz not null default now(),
-  unique (class_id, week_start)
+create table if not exists public.notification_settings (
+  id                  uuid        primary key default gen_random_uuid(),
+  user_id             uuid        not null references auth.users(id) on delete cascade,
+  kakao_access_token  text,
+  kakao_refresh_token text,
+  kakao_user_id       text,
+  enabled_events      jsonb       not null default
+    '{"assignment_created":true,"feedback_received":true,"badge_earned":true,"peer_review_assigned":true}'::jsonb,
+  created_at          timestamptz not null default now(),
+  unique (user_id)
+);
+
+-- ============================================================
+-- 15. portfolios (학습 포트폴리오 스냅샷 캐시)
+-- ============================================================
+create table if not exists public.portfolios (
+  id            uuid        primary key default gen_random_uuid(),
+  student_id    uuid        not null references public.profiles(id) on delete cascade,
+  generated_at  timestamptz not null default now(),
+  snapshot      jsonb       not null
 );

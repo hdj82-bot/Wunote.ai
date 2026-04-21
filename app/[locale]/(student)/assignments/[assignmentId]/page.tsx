@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createServerClient } from "@/lib/supabase";
 import { getAssignment, getRubric } from "@/lib/assignments";
 import SubmitClient from "./SubmitClient";
@@ -17,6 +18,7 @@ export default async function StudentAssignmentPage({
 }: {
   params: { assignmentId: string };
 }) {
+  const t = await getTranslations("pages.student.assignmentDetail");
   const supabase = createServerClient();
   const {
     data: { user },
@@ -63,14 +65,14 @@ export default async function StudentAssignmentPage({
       <div>
         <p className="text-xs text-slate-500">
           <Link href="/assignments" className="hover:underline">
-            내 과제
+            {t("breadcrumb")}
           </Link>{" "}
           › {assignment.title}
         </p>
         <h1 className="text-lg font-bold text-slate-900">{assignment.title}</h1>
         {assignment.due_date && (
           <p className="text-xs text-slate-500">
-            마감: {new Date(assignment.due_date).toLocaleString("ko-KR")}
+            {t("dueLabel", { date: new Date(assignment.due_date).toLocaleString() })}
           </p>
         )}
       </div>

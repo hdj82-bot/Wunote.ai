@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { requireAuth, AuthError } from '@/lib/auth'
 import { getPronunciationStats } from '@/lib/pronunciation'
 import type { PronunciationSession } from '@/types/pronunciation'
@@ -12,43 +13,55 @@ export default async function PronunciationHistoryPage() {
     throw err
   }
 
-  const stats = await getPronunciationStats(auth.userId)
+  const [t, stats] = await Promise.all([
+    getTranslations('pages.student.pronunciationHistory'),
+    getPronunciationStats(auth.userId),
+  ])
+
+  function formatDate(iso: string): string {
+    const d = new Date(iso)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+    <main className="mx-auto w-full max-w-3xl space-y-5 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Practice History</h1>
-          <p className="text-sm text-gray-500 mt-1">Track your pronunciation progress over time</p>
+          <h1 className="text-lg font-bold text-slate-900">{t('title')}</h1>
+          <p className="mt-0.5 text-xs text-slate-500">{t('subtitle')}</p>
         </div>
         <a href="/pronunciation" className="text-sm text-indigo-600 hover:underline">
-          ← Practice
+          {t('backLink')}
         </a>
       </div>
 
-      {/* Stats overview */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-xl border border-gray-200 bg-white px-4 py-4 text-center">
-          <p className="text-2xl font-bold text-gray-900">{stats.totalSessions}</p>
-          <p className="text-xs text-gray-500 mt-1">Total Sessions</p>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-lg border border-slate-200 bg-white p-3 text-center">
+          <p className="text-xl font-bold text-slate-900">{stats.totalSessions}</p>
+          <p className="mt-0.5 text-xs text-slate-500">{t('statSessions')}</p>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-white px-4 py-4 text-center">
-          <p className="text-2xl font-bold text-indigo-600">{stats.averageAccuracy}%</p>
-          <p className="text-xs text-gray-500 mt-1">Average Accuracy</p>
+        <div className="rounded-lg border border-slate-200 bg-white p-3 text-center">
+          <p className="text-xl font-bold text-indigo-600">{stats.averageAccuracy}%</p>
+          <p className="mt-0.5 text-xs text-slate-500">{t('statAvgAccuracy')}</p>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-white px-4 py-4 text-center">
-          <p className="text-2xl font-bold text-green-600">{stats.bestAccuracy}%</p>
-          <p className="text-xs text-gray-500 mt-1">Best Score</p>
+        <div className="rounded-lg border border-slate-200 bg-white p-3 text-center">
+          <p className="text-xl font-bold text-green-600">{stats.bestAccuracy}%</p>
+          <p className="mt-0.5 text-xs text-slate-500">{t('statBest')}</p>
         </div>
       </div>
 
-      {/* Progress bar */}
       {stats.totalSessions > 0 && (
-        <div className="rounded-xl border border-gray-200 bg-white px-5 py-4">
-          <p className="text-sm font-semibold text-gray-700 mb-3">Average Accuracy</p>
-          <div className="w-full bg-gray-100 rounded-full h-4">
+        <div className="rounded-lg border border-slate-200 bg-white px-4 py-3">
+          <p className="mb-2 text-sm font-semibold text-slate-700">{t('progressLabel')}</p>
+          <div
+            role="progressbar"
+            aria-valuenow={stats.averageAccuracy}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            className="h-3 w-full overflow-hidden rounded-full bg-slate-100"
+          >
             <div
-              className={`h-4 rounded-full transition-all ${
+              className={`h-full rounded-full transition-all ${
                 stats.averageAccuracy >= 90
                   ? 'bg-green-500'
                   : stats.averageAccuracy >= 70
@@ -58,73 +71,66 @@ export default async function PronunciationHistoryPage() {
               style={{ width: `${stats.averageAccuracy}%` }}
             />
           </div>
-          <div className="flex justify-between text-xs text-gray-400 mt-1">
+          <div className="mt-1 flex justify-between text-xs text-slate-400">
             <span>0%</span>
-            <span className="font-medium text-gray-600">{stats.averageAccuracy}%</span>
+            <span className="font-medium text-slate-600">{stats.averageAccuracy}%</span>
             <span>100%</span>
           </div>
         </div>
       )}
 
-      {/* Session list */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">Recent Sessions</h2>
+        <h2 className="mb-2 text-sm font-semibold text-slate-700">{t('recentTitle')}</h2>
         {stats.recentSessions.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-gray-300 px-6 py-12 text-center">
-            <p className="text-gray-400 text-sm">No sessions yet. Start practicing!</p>
+          <div className="rounded-lg border border-dashed border-slate-300 px-6 py-10 text-center">
+            <p className="text-sm text-slate-400">{t('emptyState')}</p>
             <a
               href="/pronunciation"
-              className="inline-block mt-3 px-4 py-2 bg-indigo-600 text-white text-sm rounded-full hover:bg-indigo-700 transition-colors"
+              className="mt-3 inline-block rounded-full bg-indigo-600 px-4 py-2 text-sm text-white
+                transition-colors hover:bg-indigo-700"
             >
-              Start Practice
+              {t('startPractice')}
             </a>
           </div>
         ) : (
-          <div className="space-y-3">
-            {stats.recentSessions.map((session: PronunciationSession) => (
-              <SessionCard key={session.id} session={session} />
-            ))}
-          </div>
+          <ul className="space-y-2">
+            {stats.recentSessions.map((session: PronunciationSession) => {
+              const scoreColor =
+                session.accuracy_score >= 90
+                  ? 'bg-green-50 text-green-600'
+                  : session.accuracy_score >= 70
+                  ? 'bg-yellow-50 text-yellow-600'
+                  : 'bg-red-50 text-red-600'
+
+              return (
+                <li
+                  key={session.id}
+                  className="rounded-lg border border-slate-200 bg-white px-4 py-3"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-1 text-sm font-medium text-slate-800">
+                        {session.target_text}
+                      </p>
+                      <p className="mt-0.5 text-xs text-slate-400">
+                        {formatDate(session.created_at)} · {session.language}
+                      </p>
+                      {session.errors.length > 0 && (
+                        <p className="mt-1 text-xs text-slate-500">
+                          {t('issueCount', { count: session.errors.length })}
+                        </p>
+                      )}
+                    </div>
+                    <div className={`shrink-0 rounded-full px-3 py-1 text-base font-bold ${scoreColor}`}>
+                      {session.accuracy_score}%
+                    </div>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
         )}
       </div>
-    </div>
-  )
-}
-
-function SessionCard({ session }: { session: PronunciationSession }) {
-  const date = new Date(session.created_at)
-  const formattedDate = date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-
-  const scoreColor =
-    session.accuracy_score >= 90
-      ? 'text-green-600 bg-green-50'
-      : session.accuracy_score >= 70
-      ? 'text-yellow-600 bg-yellow-50'
-      : 'text-red-600 bg-red-50'
-
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white px-5 py-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-800 line-clamp-1">{session.target_text}</p>
-          <p className="text-xs text-gray-400 mt-0.5">
-            {formattedDate} &middot; {session.language}
-          </p>
-          {session.errors.length > 0 && (
-            <p className="text-xs text-gray-500 mt-1">
-              {session.errors.length} issue{session.errors.length !== 1 ? 's' : ''} detected
-            </p>
-          )}
-        </div>
-        <div className={`text-lg font-bold px-3 py-1 rounded-full shrink-0 ${scoreColor}`}>
-          {session.accuracy_score}%
-        </div>
-      </div>
-    </div>
+    </main>
   )
 }

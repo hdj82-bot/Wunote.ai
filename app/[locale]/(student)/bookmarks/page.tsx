@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { createServerClient } from "@/lib/supabase";
 import BookmarksList, { type BookmarkItem } from "./BookmarksList";
 
@@ -16,12 +17,15 @@ async function loadBookmarks(): Promise<BookmarkItem[]> {
 }
 
 export default async function BookmarksPage() {
-  const items = await loadBookmarks();
+  const [t, items] = await Promise.all([
+    getTranslations("pages.student.bookmarks"),
+    loadBookmarks(),
+  ]);
   return (
     <section className="mx-auto w-full max-w-3xl space-y-4 p-4">
       <div className="flex items-baseline justify-between">
-        <h1 className="text-lg font-bold text-slate-900">예문 북마크</h1>
-        <p className="text-xs text-slate-500">{items.length}개</p>
+        <h1 className="text-lg font-bold text-slate-900">{t("title")}</h1>
+        <p className="text-xs text-slate-500">{t("countLabel", { count: items.length })}</p>
       </div>
       <BookmarksList items={items} />
     </section>

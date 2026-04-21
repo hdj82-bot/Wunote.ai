@@ -1,4 +1,4 @@
-// Handwritten Database type derived from supabase/migrations/0001_init.sql.
+// Handwritten Database type derived from supabase/migrations/*.sql (Phase 1–2).
 // Layout matches `supabase gen types typescript` output so this file can be
 // regenerated in-place once Docker Desktop is installed:
 //   npm run db:types
@@ -113,8 +113,12 @@ export type Database = {
           file_name: string
           file_type: 'pdf' | 'txt' | 'docx'
           content: string
+          title: string | null
+          description: string | null
           is_public: boolean
           download_count: number
+          avg_rating: number
+          rating_count: number
           created_at: string
         }
         Insert: {
@@ -124,8 +128,12 @@ export type Database = {
           file_name: string
           file_type: 'pdf' | 'txt' | 'docx'
           content: string
+          title?: string | null
+          description?: string | null
           is_public?: boolean
           download_count?: number
+          avg_rating?: number
+          rating_count?: number
           created_at?: string
         }
         Update: {
@@ -135,8 +143,12 @@ export type Database = {
           file_name?: string
           file_type?: 'pdf' | 'txt' | 'docx'
           content?: string
+          title?: string | null
+          description?: string | null
           is_public?: boolean
           download_count?: number
+          avg_rating?: number
+          rating_count?: number
           created_at?: string
         }
         Relationships: []
@@ -535,6 +547,8 @@ export type Database = {
           current_value: number
           deadline: string | null
           is_achieved: boolean
+          updated_at: string
+          achieved_at: string | null
           created_at: string
         }
         Insert: {
@@ -546,6 +560,8 @@ export type Database = {
           current_value?: number
           deadline?: string | null
           is_achieved?: boolean
+          updated_at?: string
+          achieved_at?: string | null
           created_at?: string
         }
         Update: {
@@ -557,6 +573,8 @@ export type Database = {
           current_value?: number
           deadline?: string | null
           is_achieved?: boolean
+          updated_at?: string
+          achieved_at?: string | null
           created_at?: string
         }
         Relationships: []
@@ -644,6 +662,7 @@ export type Database = {
           care_students: Json
           fossilization_alerts: Json
           next_class_suggestion: string | null
+          metrics: Json
           created_at: string
         }
         Insert: {
@@ -656,6 +675,7 @@ export type Database = {
           care_students?: Json
           fossilization_alerts?: Json
           next_class_suggestion?: string | null
+          metrics?: Json
           created_at?: string
         }
         Update: {
@@ -668,6 +688,7 @@ export type Database = {
           care_students?: Json
           fossilization_alerts?: Json
           next_class_suggestion?: string | null
+          metrics?: Json
           created_at?: string
         }
         Relationships: []
@@ -735,9 +756,237 @@ export type Database = {
         }
         Relationships: []
       }
+      live_sessions: {
+        Row: {
+          id: string
+          class_id: string
+          professor_id: string
+          grammar_focus: string | null
+          started_at: string
+          ended_at: string | null
+          summary: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          class_id: string
+          professor_id: string
+          grammar_focus?: string | null
+          started_at?: string
+          ended_at?: string | null
+          summary?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          class_id?: string
+          professor_id?: string
+          grammar_focus?: string | null
+          started_at?: string
+          ended_at?: string | null
+          summary?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
+      corpus_ratings: {
+        Row: {
+          id: string
+          corpus_document_id: string
+          professor_id: string
+          rating: number
+          comment: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          corpus_document_id: string
+          professor_id: string
+          rating: number
+          comment?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          corpus_document_id?: string
+          professor_id?: string
+          rating?: number
+          comment?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pronunciation_sessions: {
+        Row: {
+          id: string
+          student_id: string
+          target_text: string
+          recognized_text: string
+          accuracy_score: number
+          errors: Json
+          language: 'en-US' | 'ko-KR'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          target_text: string
+          recognized_text: string
+          accuracy_score: number
+          errors?: Json
+          language: 'en-US' | 'ko-KR'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          target_text?: string
+          recognized_text?: string
+          accuracy_score?: number
+          errors?: Json
+          language?: 'en-US' | 'ko-KR'
+          created_at?: string
+        }
+        Relationships: []
+      }
+      notification_settings: {
+        Row: {
+          id: string
+          user_id: string
+          kakao_access_token: string | null
+          kakao_refresh_token: string | null
+          kakao_user_id: string | null
+          enabled_events: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          kakao_access_token?: string | null
+          kakao_refresh_token?: string | null
+          kakao_user_id?: string | null
+          enabled_events?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          kakao_access_token?: string | null
+          kakao_refresh_token?: string | null
+          kakao_user_id?: string | null
+          enabled_events?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
+      peer_review_requests: {
+        Row: {
+          id: string
+          assignment_id: string
+          requester_id: string
+          status: 'pending' | 'in_progress' | 'completed'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          assignment_id: string
+          requester_id: string
+          status?: 'pending' | 'in_progress' | 'completed'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          assignment_id?: string
+          requester_id?: string
+          status?: 'pending' | 'in_progress' | 'completed'
+          created_at?: string
+        }
+        Relationships: []
+      }
+      peer_reviews: {
+        Row: {
+          id: string
+          request_id: string
+          reviewer_id: string
+          feedback_text: string | null
+          grammar_score: number | null
+          vocab_score: number | null
+          content_score: number | null
+          overall_score: number | null
+          status: 'pending' | 'in_progress' | 'completed'
+          created_at: string
+          completed_at: string | null
+        }
+        Insert: {
+          id?: string
+          request_id: string
+          reviewer_id: string
+          feedback_text?: string | null
+          grammar_score?: number | null
+          vocab_score?: number | null
+          content_score?: number | null
+          overall_score?: number | null
+          status?: 'pending' | 'in_progress' | 'completed'
+          created_at?: string
+          completed_at?: string | null
+        }
+        Update: {
+          id?: string
+          request_id?: string
+          reviewer_id?: string
+          feedback_text?: string | null
+          grammar_score?: number | null
+          vocab_score?: number | null
+          content_score?: number | null
+          overall_score?: number | null
+          status?: 'pending' | 'in_progress' | 'completed'
+          created_at?: string
+          completed_at?: string | null
+        }
+        Relationships: []
+      }
+      portfolios: {
+        Row: {
+          id: string
+          student_id: string
+          generated_at: string
+          snapshot: Json
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          generated_at?: string
+          snapshot: Json
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          generated_at?: string
+          snapshot?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      professor_reports_latest: {
+        Row: {
+          id: string | null
+          professor_id: string | null
+          class_id: string | null
+          week_start: string | null
+          focus_points: Json | null
+          praise_students: Json | null
+          care_students: Json | null
+          fossilization_alerts: Json | null
+          next_class_suggestion: string | null
+          metrics: Json | null
+          created_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       is_professor: { Args: Record<string, never>; Returns: boolean }
@@ -753,6 +1002,14 @@ export type Database = {
       touch_streak: {
         Args: { p_student_id: string }
         Returns: { streak_days: number; extended: boolean; was_reset: boolean }[]
+      }
+      refresh_corpus_rating_stats: {
+        Args: { p_doc_id: string }
+        Returns: undefined
+      }
+      increment_corpus_download: {
+        Args: { p_doc_id: string }
+        Returns: number
       }
     }
     Enums: {

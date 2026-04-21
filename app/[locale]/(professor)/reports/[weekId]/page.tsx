@@ -19,6 +19,58 @@ function addDays(iso: string, days: number): string {
   return d.toISOString().slice(0, 10)
 }
 
+// ── 차트 컴포넌트 (외부 라이브러리 없이 CSS 바 차트) ────────────────────────
+
+function FocusBar({
+  subtype,
+  incidence,
+  max
+}: {
+  subtype: string
+  incidence: number
+  max: number
+}) {
+  const pct = max > 0 ? Math.round((incidence / max) * 100) : 0
+  return (
+    <li className="grid grid-cols-[160px_1fr_36px] items-center gap-2 text-xs">
+      <span className="truncate text-slate-700" title={subtype}>{subtype}</span>
+      <div className="h-2.5 rounded-full bg-slate-100">
+        <div
+          className="h-full rounded-full bg-indigo-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className="text-right text-slate-600">{incidence}</span>
+    </li>
+  )
+}
+
+function FossilBar({
+  name,
+  count,
+  max
+}: {
+  name: string
+  count: number
+  max: number
+}) {
+  const pct = max > 0 ? Math.round((count / max) * 100) : 0
+  return (
+    <li className="grid grid-cols-[120px_1fr_36px] items-center gap-2 text-xs">
+      <span className="truncate text-slate-700" title={name}>{name}</span>
+      <div className="h-2.5 rounded-full bg-slate-100">
+        <div
+          className="h-full rounded-full bg-amber-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className="text-right text-amber-700">{count}</span>
+    </li>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface Block {
   title: string
   tone: 'focus' | 'praise' | 'care' | 'alert' | 'suggest'
@@ -125,6 +177,48 @@ export default async function ReportDetailPage({
           </p>
         </Card>
       </section>
+
+      {/* 시각화 차트 */}
+      {(report.focus_points.length > 0 || report.fossilization_alerts.length > 0) && (
+        <section className="grid gap-3 sm:grid-cols-2">
+          {report.focus_points.length > 0 && (
+            <Card className="p-4">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                포커스 포인트 발생 빈도
+              </h3>
+              <ul className="space-y-2" role="img" aria-label="포커스 포인트 막대 차트">
+                {(() => {
+                  const max = Math.max(...report.focus_points.map(f => f.incidence), 1)
+                  return report.focus_points.map((f, i) => (
+                    <FocusBar key={i} subtype={f.error_subtype} incidence={f.incidence} max={max} />
+                  ))
+                })()}
+              </ul>
+            </Card>
+          )}
+
+          {report.fossilization_alerts.length > 0 && (
+            <Card className="p-4">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                화석화 반복 횟수
+              </h3>
+              <ul className="space-y-2" role="img" aria-label="화석화 위험 막대 차트">
+                {(() => {
+                  const max = Math.max(...report.fossilization_alerts.map(a => a.count), 1)
+                  return report.fossilization_alerts.slice(0, 8).map((a, i) => (
+                    <FossilBar
+                      key={`${a.student_id}-${i}`}
+                      name={`${a.name} · ${a.error_subtype}`}
+                      count={a.count}
+                      max={max}
+                    />
+                  ))
+                })()}
+              </ul>
+            </Card>
+          )}
+        </section>
+      )}
 
       {/* 5블록: 포커스 / 칭찬 / 관심 필요 / 화석화 / 다음 수업 */}
       <section className="space-y-3">

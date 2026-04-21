@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import type {
   PronunciationLanguage,
   PronunciationAnalyzeResponse,
@@ -38,16 +39,6 @@ const SAMPLE_TEXTS: Record<PronunciationLanguage, { title: string; text: string 
   ],
 }
 
-const ERROR_TYPE_LABELS: Record<string, string> = {
-  word_substitution: 'Wrong Word',
-  word_omission: 'Missed Word',
-  word_insertion: 'Extra Word',
-  stress_error: 'Stress Error',
-  intonation_error: 'Intonation',
-  vowel_error: 'Vowel Error',
-  consonant_error: 'Consonant Error',
-}
-
 const ERROR_TYPE_COLORS: Record<string, string> = {
   word_substitution: 'bg-red-100 text-red-700',
   word_omission: 'bg-orange-100 text-orange-700',
@@ -58,7 +49,6 @@ const ERROR_TYPE_COLORS: Record<string, string> = {
   consonant_error: 'bg-indigo-100 text-indigo-700',
 }
 
-// Web Speech API types are not in TypeScript's lib.dom.d.ts yet.
 interface ISpeechRecognition extends EventTarget {
   lang: string
   continuous: boolean
@@ -88,6 +78,8 @@ declare global {
 }
 
 export default function PronunciationPage() {
+  const t = useTranslations('pages.student.pronunciation')
+
   const [language, setLanguage] = useState<PronunciationLanguage>('en-US')
   const [targetText, setTargetText] = useState('')
   const [transcript, setTranscript] = useState('')
@@ -99,15 +91,28 @@ export default function PronunciationPage() {
 
   const recognitionRef = useRef<ISpeechRecognition | null>(null)
 
+  const errorTypeLabel = (type: string): string => {
+    const map: Record<string, string> = {
+      word_substitution: t('errorWordSubstitution'),
+      word_omission: t('errorWordOmission'),
+      word_insertion: t('errorWordInsertion'),
+      stress_error: t('errorStressError'),
+      intonation_error: t('errorIntonationError'),
+      vowel_error: t('errorVowelError'),
+      consonant_error: t('errorConsonantError'),
+    }
+    return map[type] ?? type
+  }
+
   const startRecording = useCallback(() => {
     if (typeof window === 'undefined') return
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) {
-      setError('Speech recognition is not supported. Please use Chrome or Edge.')
+      setError(t('noSupportError'))
       return
     }
     if (!targetText.trim()) {
-      setError('Please select or enter a text passage first.')
+      setError(t('noTextError'))
       return
     }
 
@@ -141,7 +146,7 @@ export default function PronunciationPage() {
 
     recognitionRef.current = recognition
     recognition.start()
-  }, [language, targetText])
+  }, [language, targetText, t])
 
   const stopRecording = useCallback(() => {
     recognitionRef.current?.stop()
@@ -161,16 +166,16 @@ export default function PronunciationPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error ?? 'Analysis failed')
+        setError(data.error ?? t('analysisFailedError'))
         return
       }
       setResult(data as PronunciationAnalyzeResponse)
     } catch {
-      setError('Network error. Please try again.')
+      setError(t('networkError'))
     } finally {
       setIsAnalyzing(false)
     }
-  }, [transcript, targetText, language])
+  }, [transcript, targetText, language, t])
 
   const selectSample = (idx: number) => {
     setTargetText(SAMPLE_TEXTS[language][idx].text)
@@ -194,46 +199,44 @@ export default function PronunciationPage() {
   const scoreEmoji = (s: number) => (s >= 90 ? '🌟' : s >= 70 ? '👍' : '💪')
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+    <main className="mx-auto w-full max-w-3xl space-y-6 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Pronunciation Practice</h1>
-          <p className="text-sm text-gray-500 mt-1">Read aloud and get AI-powered feedback</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('title')}</h1>
+          <p className="mt-1 text-sm text-slate-500">{t('subtitle')}</p>
         </div>
         <a href="/pronunciation/history" className="text-sm text-indigo-600 hover:underline">
-          View History →
+          {t('historyLink')}
         </a>
       </div>
 
-      {/* Language selector */}
       <div className="flex gap-2">
         {(['en-US', 'ko-KR'] as PronunciationLanguage[]).map(lang => (
           <button
             key={lang}
             onClick={() => switchLanguage(lang)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               language === lang
                 ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            {lang === 'en-US' ? '🇺🇸 English' : '🇰🇷 Korean'}
+            {lang === 'en-US' ? `🇺🇸 ${t('langEnUS')}` : `🇰🇷 ${t('langKoKR')}`}
           </button>
         ))}
       </div>
 
-      {/* Sample texts */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-700 mb-2">Sample Texts</h2>
+        <h2 className="mb-2 text-sm font-semibold text-slate-700">{t('sampleTextsTitle')}</h2>
         <div className="grid grid-cols-3 gap-2">
           {SAMPLE_TEXTS[language].map((sample, idx) => (
             <button
               key={idx}
               onClick={() => selectSample(idx)}
-              className={`text-left px-3 py-2 rounded-lg border text-sm transition-colors ${
+              className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
                 selectedSample === idx
                   ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                  : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                  : 'border-slate-200 text-slate-600 hover:border-slate-300'
               }`}
             >
               {sample.title}
@@ -242,37 +245,35 @@ export default function PronunciationPage() {
         </div>
       </div>
 
-      {/* Text input */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">Text to Read</label>
+        <label className="mb-1 block text-sm font-semibold text-slate-700">{t('textInputLabel')}</label>
         <textarea
           value={targetText}
           onChange={e => {
             setTargetText(e.target.value)
             setSelectedSample(null)
           }}
-          placeholder="Select a sample or type your own text here..."
+          placeholder={t('textInputPlaceholder')}
           rows={3}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+          className="w-full resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
       </div>
 
-      {/* Recording controls */}
       <div className="flex items-center gap-4">
         {!isRecording ? (
           <button
             onClick={startRecording}
             disabled={!targetText.trim()}
-            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-full font-medium hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-3 font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <span>🎙</span> Start Recording
+            <span>🎙</span> {t('startRecording')}
           </button>
         ) : (
           <button
             onClick={stopRecording}
-            className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-colors animate-pulse"
+            className="flex animate-pulse items-center gap-2 rounded-full bg-red-500 px-6 py-3 font-medium text-white transition-colors hover:bg-red-600"
           >
-            <span>⏹</span> Stop
+            <span>⏹</span> {t('stop')}
           </button>
         )}
 
@@ -280,42 +281,40 @@ export default function PronunciationPage() {
           <button
             onClick={analyze}
             disabled={isAnalyzing}
-            className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 disabled:opacity-60 transition-colors"
+            className="flex items-center gap-2 rounded-full bg-green-600 px-6 py-3 font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-60"
           >
-            {isAnalyzing ? 'Analyzing...' : '✨ Analyze'}
+            {isAnalyzing ? t('analyzing') : `✨ ${t('analyze')}`}
           </button>
         )}
       </div>
 
-      {/* Live transcript */}
       {(isRecording || transcript) && (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-          <p className="text-xs font-semibold text-gray-500 mb-1">
-            {isRecording ? '🔴 Recording...' : 'Your Speech'}
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+          <p className="mb-1 text-xs font-semibold text-slate-500">
+            {isRecording ? `🔴 ${t('recordingLabel')}` : t('speechLabel')}
           </p>
-          <p className="text-sm text-gray-800 min-h-[1.5rem]">
-            {transcript || <span className="text-gray-400 italic">Listening...</span>}
+          <p className="min-h-[1.5rem] text-sm text-slate-800">
+            {transcript || <span className="italic text-slate-400">{t('listeningPlaceholder')}</span>}
           </p>
         </div>
       )}
 
       {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
-      {/* Results */}
       {result && (
         <div className="space-y-4">
-          <hr className="border-gray-200" />
-          <h2 className="text-lg font-bold text-gray-900">Analysis Results</h2>
+          <hr className="border-slate-200" />
+          <h2 className="text-lg font-bold text-slate-900">{t('resultsTitle')}</h2>
 
           <div className={`rounded-xl border px-6 py-5 ${scoreBg(result.accuracy_score)}`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Accuracy Score</p>
-                <p className={`text-4xl font-bold mt-1 ${scoreColor(result.accuracy_score)}`}>
+                <p className="text-sm text-slate-600">{t('accuracyLabel')}</p>
+                <p className={`mt-1 text-4xl font-bold ${scoreColor(result.accuracy_score)}`}>
                   {result.accuracy_score}%
                 </p>
               </div>
@@ -325,26 +324,26 @@ export default function PronunciationPage() {
 
           {result.analysis.errors.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">
-                Issues Found ({result.analysis.errors.length})
+              <h3 className="mb-2 text-sm font-semibold text-slate-700">
+                {t('issuesFound', { count: result.analysis.errors.length })}
               </h3>
               <div className="space-y-2">
                 {result.analysis.errors.map((err: PronunciationError, i: number) => (
-                  <div key={i} className="rounded-lg border border-gray-200 bg-white px-4 py-3">
+                  <div key={i} className="rounded-lg border border-slate-200 bg-white px-4 py-3">
                     <div className="flex items-start gap-3">
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
-                          ERROR_TYPE_COLORS[err.type] ?? 'bg-gray-100 text-gray-700'
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                          ERROR_TYPE_COLORS[err.type] ?? 'bg-slate-100 text-slate-700'
                         }`}
                       >
-                        {ERROR_TYPE_LABELS[err.type] ?? err.type}
+                        {errorTypeLabel(err.type)}
                       </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800">{err.word}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-slate-800">{err.word}</p>
                         {err.recognized && (
-                          <p className="text-xs text-gray-500">Said: &ldquo;{err.recognized}&rdquo;</p>
+                          <p className="text-xs text-slate-500">{t('saidLabel', { text: err.recognized })}</p>
                         )}
-                        <p className="text-xs text-gray-600 mt-1">{err.explanation}</p>
+                        <p className="mt-1 text-xs text-slate-600">{err.explanation}</p>
                       </div>
                     </div>
                   </div>
@@ -353,29 +352,29 @@ export default function PronunciationPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3">
-              <p className="text-xs font-semibold text-blue-700 mb-1">Tone &amp; Intonation</p>
-              <p className="text-sm text-gray-700">{result.analysis.tone_feedback}</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
+              <p className="mb-1 text-xs font-semibold text-blue-700">{t('toneFeedbackTitle')}</p>
+              <p className="text-sm text-slate-700">{result.analysis.tone_feedback}</p>
             </div>
-            <div className="rounded-lg bg-purple-50 border border-purple-100 px-4 py-3">
-              <p className="text-xs font-semibold text-purple-700 mb-1">Stress Patterns</p>
-              <p className="text-sm text-gray-700">{result.analysis.stress_feedback}</p>
+            <div className="rounded-lg border border-purple-100 bg-purple-50 px-4 py-3">
+              <p className="mb-1 text-xs font-semibold text-purple-700">{t('stressFeedbackTitle')}</p>
+              <p className="text-sm text-slate-700">{result.analysis.stress_feedback}</p>
             </div>
           </div>
 
-          <div className="rounded-lg bg-gray-50 border border-gray-200 px-4 py-3">
-            <p className="text-xs font-semibold text-gray-600 mb-1">Overall Feedback</p>
-            <p className="text-sm text-gray-700">{result.analysis.overall_feedback}</p>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+            <p className="mb-1 text-xs font-semibold text-slate-600">{t('overallFeedbackTitle')}</p>
+            <p className="text-sm text-slate-700">{result.analysis.overall_feedback}</p>
           </div>
 
           {result.analysis.tips.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">Tips for Improvement</h3>
+              <h3 className="mb-2 text-sm font-semibold text-slate-700">{t('tipsTitle')}</h3>
               <ul className="space-y-1">
                 {result.analysis.tips.map((tip: string, i: number) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
-                    <span className="text-indigo-500 mt-0.5 shrink-0">•</span>
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                    <span className="mt-0.5 shrink-0 text-indigo-500">•</span>
                     {tip}
                   </li>
                 ))}
@@ -388,12 +387,12 @@ export default function PronunciationPage() {
               setTranscript('')
               setResult(null)
             }}
-            className="w-full py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            className="w-full rounded-lg border border-slate-300 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-50"
           >
-            Try Again
+            {t('tryAgain')}
           </button>
         </div>
       )}
-    </div>
+    </main>
   )
 }
