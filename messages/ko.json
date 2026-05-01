@@ -23,7 +23,13 @@
       "urlAnalyze": "URL 분석",
       "settings": "환경설정",
       "menuOpen": "메뉴 열기",
-      "menuClose": "메뉴 닫기"
+      "menuClose": "메뉴 닫기",
+      "groups": {
+        "study": "학습",
+        "assignments": "과제·평가",
+        "tools": "도구",
+        "account": "계정"
+      }
     },
     "professor": {
       "dashboard": "대시보드",

@@ -23,7 +23,13 @@
       "urlAnalyze": "URL 分析",
       "settings": "環境設定",
       "menuOpen": "メニューを開く",
-      "menuClose": "メニューを閉じる"
+      "menuClose": "メニューを閉じる",
+      "groups": {
+        "study": "学習",
+        "assignments": "課題・評価",
+        "tools": "ツール",
+        "account": "アカウント"
+      }
     },
     "professor": {
       "dashboard": "ダッシュボード",
