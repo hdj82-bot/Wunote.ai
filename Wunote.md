@@ -714,22 +714,22 @@ Claude API로 어휘·문체 분석
 - [x] 화석화 감지
 
 ### Phase 2
-- [ ] 주간 카드뉴스 자동 생성·발송
-- [ ] 교수자 다음 수업 AI 제안 리포트
-- [ ] 과제 출제·루브릭 평가
-- [ ] 수업 중 실시간 모드
-- [ ] 수업 자료 연동 (당주 문법 포인트)
-- [ ] 단어장·플래시카드 (스페이스드 리피티션)
-- [ ] 오류 유형 퀴즈 (게이미피케이션 연동)
-- [ ] 예문 북마크
-- [ ] 학습 목표 설정·추적
-- [ ] 번역 역방향 비교 (DeepL·Papago·GPT)
+- [x] 주간 카드뉴스 자동 생성·발송
+- [x] 교수자 다음 수업 AI 제안 리포트
+- [x] 과제 출제·루브릭 평가
+- [x] 수업 중 실시간 모드
+- [x] 수업 자료 연동 (당주 문법 포인트)
+- [x] 단어장·플래시카드 (스페이스드 리피티션)
+- [x] 오류 유형 퀴즈 (게이미피케이션 연동)
+- [x] 예문 북마크
+- [x] 학습 목표 설정·추적
+- [x] 번역 역방향 비교 (DeepL·Papago·GPT)
 - [ ] URL 분석 모드 (뉴스·SNS)
-- [ ] HSK 급수 태그
-- [ ] 개인 성장 대시보드·학기 간 비교
-- [ ] 교수자 간 마켓플레이스
-- [ ] 다국어 UI (영어·일본어)
-- [ ] 웹 푸시·이메일 발송
+- [x] HSK 급수 태그
+- [x] 개인 성장 대시보드·학기 간 비교
+- [x] 교수자 간 마켓플레이스
+- [x] 다국어 UI (영어·일본어)
+- [x] 웹 푸시·이메일 발송
 
 ### Phase 3
 - [x] 포트폴리오 PDF 자동 생성 (/portfolio)
@@ -739,6 +739,11 @@ Claude API로 어휘·문체 분석
 - [x] 연구 데이터 내보내기 + 학습자 데이터 이식성 (/api/export/*, /data-export)
 - [x] LMS Public API + API Key 인증 + Swagger (/api/lms/*, /api/docs)
 - [x] 오프라인 모드 Service Worker (public/sw.js)
+
+### 보너스 (스펙 외 추가 구현)
+- [x] Google OAuth 로그인 (Supabase Auth provider, `/api/auth/callback`)
+- [x] PWA Service Worker — 오프라인 폴백 페이지 + 정적 자원 캐싱 (`public/sw.js`, `public/offline.html`)
+  - Phase 3 항목과 별개로, 학생 화면 전반에서 오프라인 인디케이터(`components/OfflineIndicator.tsx`) 노출
 
 ### Phase 3 신규 라우트 참조
 
