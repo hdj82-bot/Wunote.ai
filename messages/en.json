@@ -23,7 +23,13 @@
       "urlAnalyze": "URL Analysis",
       "settings": "Settings",
       "menuOpen": "Open menu",
-      "menuClose": "Close menu"
+      "menuClose": "Close menu",
+      "groups": {
+        "study": "Study",
+        "assignments": "Assignments & Review",
+        "tools": "Tools",
+        "account": "Account"
+      }
     },
     "professor": {
       "dashboard": "Dashboard",
