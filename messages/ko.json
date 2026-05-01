@@ -355,6 +355,7 @@
       "portfolio": {
         "title": "포트폴리오",
         "printButton": "인쇄",
+        "downloadPdf": "PDF 다운로드",
         "levelBeginner": "초급",
         "levelIntermediate": "중급",
         "levelAdvanced": "고급",
@@ -515,7 +516,38 @@
         "title": "내 자료 공개 관리",
         "subtitle": "공개 전환 시 다른 교수자가 검색·다운로드할 수 있습니다.",
         "publicCount": "{publicCount} / {total} 공개",
-        "emptyState": "업로드한 코퍼스가 없습니다. 먼저 수업 페이지에서 코퍼스를 업로드하세요."
+        "emptyState": "업로드한 코퍼스가 없습니다. 먼저 수업 페이지에서 코퍼스를 업로드하세요.",
+        "publicCheckbox": "공개",
+        "titlePlaceholder": "제목",
+        "descriptionPlaceholder": "설명 (다른 교수자가 보게 될 소개 문구)",
+        "ratingSummary": "{rating} ({count}명)",
+        "downloadsSummary": "⬇ {count}회",
+        "saving": "저장 중…",
+        "saveButton": "저장",
+        "savedMsg": "저장되었습니다.",
+        "saveFailed": "저장 실패",
+        "unknownError": "알 수 없는 오류"
+      },
+      "reportsExport": {
+        "title": "연구 데이터 내보내기",
+        "subtitle": "수업 오류·진행 상황 데이터를 익명화해 연구용으로 내려받습니다.",
+        "classLabel": "수업",
+        "loadingClasses": "수업 불러오는 중…",
+        "startDateLabel": "시작일",
+        "endDateLabel": "종료일",
+        "optional": "(선택)",
+        "formatLabel": "파일 형식",
+        "formatCsvHint": "오류 레코드 평면화 — 스프레드시트·통계 도구에 적합합니다.",
+        "formatJsonHint": "메타데이터·오류·학생별 진행 상황을 포함한 전체 구조화 페이로드.",
+        "anonLabel": "익명화 수준",
+        "anonNone": "없음 — 실제 학생 ID 포함",
+        "anonPartial": "부분 — ID를 SHA-256 해시로 치환",
+        "anonFull": "전체 — ID 해시 + 오류 텍스트 마스킹",
+        "anonHint": "외부에 연구 데이터를 공유하려면 부분/전체 익명화가 필요합니다.",
+        "exportFailed": "내보내기 실패",
+        "unexpectedError": "예기치 못한 오류가 발생했습니다.",
+        "generating": "생성 중…",
+        "downloadFormat": ".{format} 다운로드"
       },
       "apiKeys": {
         "title": "LMS API 키",
@@ -589,6 +621,51 @@
         "aggregateFail": "집계 실패 ({status})",
         "startFail": "시작 실패 ({status})",
         "endFail": "종료 실패 ({status})"
+      }
+    },
+    "marketplace": {
+      "list": {
+        "title": "교수자 마켓플레이스",
+        "subtitle": "다른 교수자가 공개한 코퍼스와 예시 세트를 검색·다운로드합니다.",
+        "searchPlaceholder": "제목·설명·파일명 검색",
+        "searchButton": "검색",
+        "sortRating": "평점순",
+        "sortDownloads": "다운로드순",
+        "sortNew": "신규순",
+        "publishLink": "내 자료 공개 관리 →",
+        "itemCount": "{total}개 자료",
+        "emptyState": "조건에 맞는 공개 자료가 없습니다.",
+        "ratingAria": "평점 {value}"
+      },
+      "detail": {
+        "breadcrumbList": "마켓플레이스",
+        "breadcrumbDetail": "상세",
+        "uploadInfo": "업로드 {date} · {chars}자",
+        "statRating": "평점",
+        "statRatingPeople": "({count}명)",
+        "statDownloads": "다운로드",
+        "statDownloadsCount": "{count}회",
+        "statFile": "파일",
+        "downloadButton": "다운로드",
+        "previewTitle": "미리보기",
+        "previewMore": "… (이어지는 내용은 다운로드해 확인)",
+        "ratingFormTitle": "평점 남기기",
+        "recentRatingsTitle": "최근 평점",
+        "ratingAria": "평점 {value}"
+      },
+      "rating": {
+        "starsAria": "별점",
+        "starAria": "{n}점",
+        "starSelectedSuffix": "{n}점",
+        "starUnselected": "선택",
+        "commentPlaceholder": "코멘트 (선택)",
+        "saving": "저장 중…",
+        "updateButton": "평점 수정",
+        "createButton": "평점 등록",
+        "validateStars": "별점을 선택하세요 (1~5)",
+        "saveError": "평점 저장 실패",
+        "successMsg": "평점이 저장되었습니다.",
+        "unknownError": "알 수 없는 오류"
       }
     },
     "components": {

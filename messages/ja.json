@@ -355,6 +355,7 @@
       "portfolio": {
         "title": "ポートフォリオ",
         "printButton": "印刷",
+        "downloadPdf": "PDF ダウンロード",
         "levelBeginner": "初級",
         "levelIntermediate": "中級",
         "levelAdvanced": "上級",
@@ -515,7 +516,38 @@
         "title": "教材の公開管理",
         "subtitle": "公開すると、他の教員が検索・ダウンロードできます。",
         "publicCount": "{publicCount} / {total} 公開",
-        "emptyState": "アップロード済みのコーパスがありません。授業ページからコーパスをアップロードしてください。"
+        "emptyState": "アップロード済みのコーパスがありません。授業ページからコーパスをアップロードしてください。",
+        "publicCheckbox": "公開",
+        "titlePlaceholder": "タイトル",
+        "descriptionPlaceholder": "説明(他の教員に表示される紹介文)",
+        "ratingSummary": "{rating} ({count}名)",
+        "downloadsSummary": "⬇ {count}回",
+        "saving": "保存中…",
+        "saveButton": "保存",
+        "savedMsg": "保存しました。",
+        "saveFailed": "保存に失敗しました",
+        "unknownError": "不明なエラー"
+      },
+      "reportsExport": {
+        "title": "研究データのエクスポート",
+        "subtitle": "授業のエラーと進捗データを匿名化して研究用にダウンロードします。",
+        "classLabel": "授業",
+        "loadingClasses": "授業を読み込み中…",
+        "startDateLabel": "開始日",
+        "endDateLabel": "終了日",
+        "optional": "(任意)",
+        "formatLabel": "ファイル形式",
+        "formatCsvHint": "エラーレコードをフラット化 — スプレッドシートや統計ツールに最適。",
+        "formatJsonHint": "メタデータ・エラー・学生別進捗を含む完全な構造化ペイロード。",
+        "anonLabel": "匿名化レベル",
+        "anonNone": "なし — 実際の学生 ID を含む",
+        "anonPartial": "部分 — ID を SHA-256 ハッシュに置換",
+        "anonFull": "完全 — ID をハッシュ化しエラー本文も伏字化",
+        "anonHint": "研究データを外部共有するには部分または完全な匿名化が必要です。",
+        "exportFailed": "エクスポートに失敗しました",
+        "unexpectedError": "予期しないエラーが発生しました。",
+        "generating": "生成中…",
+        "downloadFormat": ".{format} をダウンロード"
       },
       "apiKeys": {
         "title": "LMS APIキー",
@@ -589,6 +621,51 @@
         "aggregateFail": "集計失敗 ({status})",
         "startFail": "開始失敗 ({status})",
         "endFail": "終了失敗 ({status})"
+      }
+    },
+    "marketplace": {
+      "list": {
+        "title": "教員マーケットプレイス",
+        "subtitle": "他の教員が公開したコーパスやサンプルセットを検索・ダウンロードします。",
+        "searchPlaceholder": "タイトル・説明・ファイル名で検索",
+        "searchButton": "検索",
+        "sortRating": "評価順",
+        "sortDownloads": "ダウンロード順",
+        "sortNew": "新着順",
+        "publishLink": "教材の公開管理 →",
+        "itemCount": "{total}件の教材",
+        "emptyState": "条件に一致する公開教材がありません。",
+        "ratingAria": "評価 {value}"
+      },
+      "detail": {
+        "breadcrumbList": "マーケットプレイス",
+        "breadcrumbDetail": "詳細",
+        "uploadInfo": "アップロード {date} · {chars}文字",
+        "statRating": "評価",
+        "statRatingPeople": "({count}名)",
+        "statDownloads": "ダウンロード",
+        "statDownloadsCount": "{count}回",
+        "statFile": "ファイル",
+        "downloadButton": "ダウンロード",
+        "previewTitle": "プレビュー",
+        "previewMore": "… (続きはダウンロードしてご確認ください)",
+        "ratingFormTitle": "評価を投稿",
+        "recentRatingsTitle": "最近の評価",
+        "ratingAria": "評価 {value}"
+      },
+      "rating": {
+        "starsAria": "星評価",
+        "starAria": "{n}点",
+        "starSelectedSuffix": "{n}点",
+        "starUnselected": "選択",
+        "commentPlaceholder": "コメント (任意)",
+        "saving": "保存中…",
+        "updateButton": "評価を更新",
+        "createButton": "評価を投稿",
+        "validateStars": "星評価を選択してください (1〜5)",
+        "saveError": "評価の保存に失敗しました",
+        "successMsg": "評価を保存しました。",
+        "unknownError": "不明なエラー"
       }
     },
     "components": {

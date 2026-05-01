@@ -1,13 +1,8 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { listMarketplace } from '@/lib/marketplace'
 import Card from '@/components/ui/Card'
 import type { MarketplaceSort } from '@/types/marketplace'
-
-const SORT_LABEL: Record<MarketplaceSort, string> = {
-  rating: '평점순',
-  downloads: '다운로드순',
-  new: '신규순'
-}
 
 function parseSort(raw: string | string[] | undefined): MarketplaceSort {
   const v = Array.isArray(raw) ? raw[0] : raw
@@ -20,10 +15,10 @@ function formatDate(iso: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function Stars({ value }: { value: number }) {
+function Stars({ value, ariaLabel }: { value: number; ariaLabel: string }) {
   const full = Math.round(value)
   return (
-    <span aria-label={`평점 ${value.toFixed(1)}`} className="text-amber-500">
+    <span aria-label={ariaLabel} className="text-amber-500">
       {'★'.repeat(full)}
       <span className="text-slate-300">{'★'.repeat(Math.max(0, 5 - full))}</span>
     </span>
@@ -37,24 +32,29 @@ export default async function MarketplacePage({
 }: {
   searchParams: { q?: string; sort?: string }
 }) {
+  const t = await getTranslations('pages.marketplace.list')
   const q = searchParams.q?.trim() ?? ''
   const sort = parseSort(searchParams.sort)
   const { items, total } = await listMarketplace(q || undefined, sort)
 
+  const sortLabel: Record<MarketplaceSort, string> = {
+    rating: t('sortRating'),
+    downloads: t('sortDownloads'),
+    new: t('sortNew')
+  }
+
   return (
     <main className="mx-auto w-full max-w-5xl space-y-5 p-4">
       <header className="space-y-1">
-        <h1 className="text-lg font-bold text-slate-900">교수자 마켓플레이스</h1>
-        <p className="text-xs text-slate-500">
-          다른 교수자가 공개한 코퍼스와 예시 세트를 검색·다운로드합니다.
-        </p>
+        <h1 className="text-lg font-bold text-slate-900">{t('title')}</h1>
+        <p className="text-xs text-slate-500">{t('subtitle')}</p>
       </header>
 
       <form method="get" className="flex flex-wrap items-center gap-2">
         <input
           name="q"
           defaultValue={q}
-          placeholder="제목·설명·파일명 검색"
+          placeholder={t('searchPlaceholder')}
           className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500"
         />
         <select
@@ -62,9 +62,9 @@ export default async function MarketplacePage({
           defaultValue={sort}
           className="rounded-md border border-slate-300 px-2 py-2 text-sm"
         >
-          {(Object.keys(SORT_LABEL) as MarketplaceSort[]).map(key => (
+          {(Object.keys(sortLabel) as MarketplaceSort[]).map(key => (
             <option key={key} value={key}>
-              {SORT_LABEL[key]}
+              {sortLabel[key]}
             </option>
           ))}
         </select>
@@ -72,21 +72,21 @@ export default async function MarketplacePage({
           type="submit"
           className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
         >
-          검색
+          {t('searchButton')}
         </button>
         <Link
           href="/marketplace/publish"
           className="ml-auto text-xs text-indigo-600 hover:underline"
         >
-          내 자료 공개 관리 →
+          {t('publishLink')}
         </Link>
       </form>
 
-      <p className="text-xs text-slate-500">{total}개 자료</p>
+      <p className="text-xs text-slate-500">{t('itemCount', { total })}</p>
 
       {items.length === 0 ? (
         <p className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-          조건에 맞는 공개 자료가 없습니다.
+          {t('emptyState')}
         </p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">
@@ -109,7 +109,10 @@ export default async function MarketplacePage({
                   )}
                   <dl className="mt-3 flex items-center gap-3 text-xs text-slate-600">
                     <div className="flex items-center gap-1">
-                      <Stars value={item.avg_rating} />
+                      <Stars
+                        value={item.avg_rating}
+                        ariaLabel={t('ratingAria', { value: item.avg_rating.toFixed(1) })}
+                      />
                       <span>{item.avg_rating.toFixed(1)}</span>
                       <span className="text-slate-400">({item.rating_count})</span>
                     </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import Button from '@/components/ui/Button'
 import type { MyCorpusItem } from '@/types/marketplace'
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function PublishRow({ item }: Props) {
+  const t = useTranslations('pages.professor.marketplacePublish')
   const router = useRouter()
   const [title, setTitle] = useState(item.title)
   const [description, setDescription] = useState(item.description ?? '')
@@ -40,13 +42,13 @@ export default function PublishRow({ item }: Props) {
         })
       })
       if (!res.ok) {
-        const msg = (await res.json().catch(() => null))?.error ?? '저장 실패'
+        const msg = (await res.json().catch(() => null))?.error ?? t('saveFailed')
         throw new Error(msg)
       }
-      setOkMsg('저장되었습니다.')
+      setOkMsg(t('savedMsg'))
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : '알 수 없는 오류')
+      setError(err instanceof Error ? err.message : t('unknownError'))
     } finally {
       setSaving(false)
     }
@@ -64,21 +66,21 @@ export default function PublishRow({ item }: Props) {
             checked={isPublic}
             onChange={e => setIsPublic(e.target.checked)}
           />
-          공개
+          {t('publicCheckbox')}
         </label>
       </div>
 
       <input
         value={title}
         onChange={e => setTitle(e.target.value)}
-        placeholder="제목"
+        placeholder={t('titlePlaceholder')}
         maxLength={200}
         className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500"
       />
       <textarea
         value={description}
         onChange={e => setDescription(e.target.value)}
-        placeholder="설명 (다른 교수자가 보게 될 소개 문구)"
+        placeholder={t('descriptionPlaceholder')}
         maxLength={500}
         rows={2}
         className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500"
@@ -87,9 +89,14 @@ export default function PublishRow({ item }: Props) {
       <div className="flex items-center gap-3 text-xs text-slate-500">
         <span className="text-amber-500">★</span>
         <span>
-          {item.avg_rating.toFixed(1)} ({item.rating_count}명)
+          {t('ratingSummary', {
+            rating: item.avg_rating.toFixed(1),
+            count: item.rating_count
+          })}
         </span>
-        <span className="text-slate-400">⬇ {item.download_count}회</span>
+        <span className="text-slate-400">
+          {t('downloadsSummary', { count: item.download_count })}
+        </span>
         <div className="ml-auto flex items-center gap-2">
           {okMsg && <span className="text-emerald-600">{okMsg}</span>}
           {error && (
@@ -98,7 +105,7 @@ export default function PublishRow({ item }: Props) {
             </span>
           )}
           <Button size="sm" onClick={save} disabled={!dirty || saving}>
-            {saving ? '저장 중…' : '저장'}
+            {saving ? t('saving') : t('saveButton')}
           </Button>
         </div>
       </div>
