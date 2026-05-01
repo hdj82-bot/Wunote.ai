@@ -55,6 +55,7 @@ type NavKey =
   | "badges"
   | "goals"
   | "translate"
+  | "urlAnalyze"
   | "portfolio"
   | "peerReview"
   | "pronunciation"
@@ -73,6 +74,7 @@ const NAV: Array<{ href: string; key: NavKey }> = [
   { href: "/badges", key: "badges" },
   { href: "/goals", key: "goals" },
   { href: "/translate", key: "translate" },
+  { href: "/analyze-url", key: "urlAnalyze" },
   { href: "/portfolio", key: "portfolio" },
   { href: "/peer-review", key: "peerReview" },
   { href: "/pronunciation", key: "pronunciation" },
