@@ -19,7 +19,8 @@
       "peerReview": "동료 리뷰",
       "pronunciation": "발음 연습",
       "notifications": "알림 설정",
-      "dataExport": "데이터 내보내기"
+      "dataExport": "데이터 내보내기",
+      "urlAnalyze": "URL 분석"
     },
     "professor": {
       "dashboard": "대시보드",
@@ -116,6 +117,34 @@
         "chartAriaRecent30": "최근 30일 오류 추이",
         "chartTooltip": "{date}: {count}건",
         "unclassified": "(미분류)"
+      },
+      "urlAnalyze": {
+        "title": "URL 어휘·문체 분석",
+        "subtitle": "중국어 뉴스·웨이보·샤오홍수 URL 을 입력하면 본문에서 학습 가치 있는 표현을 골라 격식체·신조어·HSK 급수 정보를 함께 보여드려요.",
+        "urlLabel": "분석할 URL",
+        "urlPlaceholder": "https://www.xinhuanet.com/...",
+        "supportedSourcesHint": "지원: 신화사·인민일보·웨이보·샤오홍수 외 일반 중국어 페이지",
+        "convertToCardsLabel": "분석 결과를 오류 카드 형식으로 변환해서 함께 받기",
+        "analyze": "분석하기",
+        "analyzing": "분석 중…",
+        "genericError": "분석에 실패했어요",
+        "resultHeading": "분석 결과",
+        "estimatedHsk": "추정 HSK 급수: {level}",
+        "viewSource": "원문 보기 →",
+        "studyPointsHeading": "학습 포인트",
+        "annotationsHeading": "어휘 주석",
+        "slangHeading": "인터넷 신조어",
+        "cardsConverted": "오류 카드 형식으로 {count}개 변환됨",
+        "cardsConvertedHint": "응답 객체의 cards 필드로 함께 반환됐습니다. (저장은 별도 단계)",
+        "historyTitle": "최근 분석 기록",
+        "emptyState": "아직 분석한 URL 이 없어요. 위에서 URL 을 입력해 보세요.",
+        "annotationsCount": "주석 {count}개",
+        "source": {
+          "news": "뉴스",
+          "weibo": "웨이보",
+          "xiaohongshu": "샤오홍수",
+          "other": "일반"
+        }
       },
       "cardnews": {
         "title": "주간 카드뉴스",
