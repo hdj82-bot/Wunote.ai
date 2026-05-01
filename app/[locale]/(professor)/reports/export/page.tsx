@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, FormEvent } from 'react'
+import { useTranslations } from 'next-intl'
 import { createBrowserClient } from '@/lib/supabase'
 import type { ExportFormat, AnonymizationLevel } from '@/types/export'
 
@@ -11,6 +12,7 @@ interface ClassOption {
 }
 
 export default function ProfessorExportPage() {
+  const t = useTranslations('pages.professor.reportsExport')
   const [classes, setClasses] = useState<ClassOption[]>([])
   const [classId, setClassId] = useState('')
   const [startDate, setStartDate] = useState('')
@@ -56,7 +58,7 @@ export default function ProfessorExportPage() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        setError((body as { error?: string }).error ?? 'Export failed')
+        setError((body as { error?: string }).error ?? t('exportFailed'))
         return
       }
 
@@ -72,7 +74,7 @@ export default function ProfessorExportPage() {
       a.click()
       URL.revokeObjectURL(url)
     } catch {
-      setError('An unexpected error occurred')
+      setError(t('unexpectedError'))
     } finally {
       setLoading(false)
     }
@@ -80,19 +82,16 @@ export default function ProfessorExportPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Export Research Data</h1>
-      <p className="text-sm text-gray-500 mb-8">
-        Download anonymized class error and progress data for research purposes.
-      </p>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('title')}</h1>
+      <p className="text-sm text-gray-500 mb-8">{t('subtitle')}</p>
 
       <form onSubmit={handleExport} className="space-y-6">
-        {/* Class selector */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Class
+            {t('classLabel')}
           </label>
           {classes.length === 0 ? (
-            <p className="text-sm text-gray-400">Loading classes…</p>
+            <p className="text-sm text-gray-400">{t('loadingClasses')}</p>
           ) : (
             <select
               value={classId}
@@ -109,11 +108,10 @@ export default function ProfessorExportPage() {
           )}
         </div>
 
-        {/* Date range */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Start date <span className="text-gray-400">(optional)</span>
+              {t('startDateLabel')} <span className="text-gray-400">{t('optional')}</span>
             </label>
             <input
               type="date"
@@ -124,7 +122,7 @@ export default function ProfessorExportPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              End date <span className="text-gray-400">(optional)</span>
+              {t('endDateLabel')} <span className="text-gray-400">{t('optional')}</span>
             </label>
             <input
               type="date"
@@ -136,10 +134,9 @@ export default function ProfessorExportPage() {
           </div>
         </div>
 
-        {/* Format */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            File format
+            {t('formatLabel')}
           </label>
           <div className="flex gap-4">
             {(['csv', 'json'] as ExportFormat[]).map(f => (
@@ -157,29 +154,24 @@ export default function ProfessorExportPage() {
             ))}
           </div>
           <p className="mt-1 text-xs text-gray-400">
-            {format === 'csv'
-              ? 'Flat error records — best for spreadsheets and statistical tools.'
-              : 'Full structured payload with metadata, errors, and per-student progress.'}
+            {format === 'csv' ? t('formatCsvHint') : t('formatJsonHint')}
           </p>
         </div>
 
-        {/* Anonymization */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Anonymization level
+            {t('anonLabel')}
           </label>
           <select
             value={anonymizationLevel}
             onChange={e => setAnonymizationLevel(e.target.value as AnonymizationLevel)}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            <option value="none">None — include real student IDs</option>
-            <option value="partial">Partial — replace IDs with SHA-256 hashes</option>
-            <option value="full">Full — hash IDs and redact error text</option>
+            <option value="none">{t('anonNone')}</option>
+            <option value="partial">{t('anonPartial')}</option>
+            <option value="full">{t('anonFull')}</option>
           </select>
-          <p className="mt-1 text-xs text-gray-400">
-            Partial or full anonymization is required for sharing research data externally.
-          </p>
+          <p className="mt-1 text-xs text-gray-400">{t('anonHint')}</p>
         </div>
 
         {error && (
@@ -191,7 +183,7 @@ export default function ProfessorExportPage() {
           disabled={loading || !classId}
           className="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {loading ? 'Generating export…' : `Download .${format.toUpperCase()}`}
+          {loading ? t('generating') : t('downloadFormat', { format: format.toUpperCase() })}
         </button>
       </form>
     </div>

@@ -326,6 +326,7 @@
       "portfolio": {
         "title": "Portfolio",
         "printButton": "Print",
+        "downloadPdf": "Download PDF",
         "levelBeginner": "Beginner",
         "levelIntermediate": "Intermediate",
         "levelAdvanced": "Advanced",
@@ -486,7 +487,38 @@
         "title": "Manage my materials",
         "subtitle": "When published, other professors can search and download your materials.",
         "publicCount": "{publicCount} / {total} public",
-        "emptyState": "No corpus uploaded yet. Upload corpus from a class page first."
+        "emptyState": "No corpus uploaded yet. Upload corpus from a class page first.",
+        "publicCheckbox": "Public",
+        "titlePlaceholder": "Title",
+        "descriptionPlaceholder": "Description (intro shown to other professors)",
+        "ratingSummary": "{rating} ({count})",
+        "downloadsSummary": "⬇ {count}",
+        "saving": "Saving…",
+        "saveButton": "Save",
+        "savedMsg": "Saved.",
+        "saveFailed": "Save failed",
+        "unknownError": "Unknown error"
+      },
+      "reportsExport": {
+        "title": "Export research data",
+        "subtitle": "Download anonymized class error and progress data for research purposes.",
+        "classLabel": "Class",
+        "loadingClasses": "Loading classes…",
+        "startDateLabel": "Start date",
+        "endDateLabel": "End date",
+        "optional": "(optional)",
+        "formatLabel": "File format",
+        "formatCsvHint": "Flat error records — best for spreadsheets and statistical tools.",
+        "formatJsonHint": "Full structured payload with metadata, errors, and per-student progress.",
+        "anonLabel": "Anonymization level",
+        "anonNone": "None — include real student IDs",
+        "anonPartial": "Partial — replace IDs with SHA-256 hashes",
+        "anonFull": "Full — hash IDs and redact error text",
+        "anonHint": "Partial or full anonymization is required for sharing research data externally.",
+        "exportFailed": "Export failed",
+        "unexpectedError": "An unexpected error occurred.",
+        "generating": "Generating export…",
+        "downloadFormat": "Download .{format}"
       },
       "apiKeys": {
         "title": "LMS API keys",
@@ -560,6 +592,51 @@
         "aggregateFail": "Aggregate failed ({status})",
         "startFail": "Start failed ({status})",
         "endFail": "End failed ({status})"
+      }
+    },
+    "marketplace": {
+      "list": {
+        "title": "Professor marketplace",
+        "subtitle": "Search and download corpus and example sets shared by other professors.",
+        "searchPlaceholder": "Search by title, description, or filename",
+        "searchButton": "Search",
+        "sortRating": "Top rated",
+        "sortDownloads": "Most downloaded",
+        "sortNew": "Newest",
+        "publishLink": "Manage my materials →",
+        "itemCount": "{total} items",
+        "emptyState": "No public materials match your filters.",
+        "ratingAria": "Rating {value}"
+      },
+      "detail": {
+        "breadcrumbList": "Marketplace",
+        "breadcrumbDetail": "Detail",
+        "uploadInfo": "Uploaded {date} · {chars} chars",
+        "statRating": "Rating",
+        "statRatingPeople": "({count})",
+        "statDownloads": "Downloads",
+        "statDownloadsCount": "{count}",
+        "statFile": "File",
+        "downloadButton": "Download",
+        "previewTitle": "Preview",
+        "previewMore": "… (download to see the rest)",
+        "ratingFormTitle": "Leave a rating",
+        "recentRatingsTitle": "Recent ratings",
+        "ratingAria": "Rating {value}"
+      },
+      "rating": {
+        "starsAria": "Star rating",
+        "starAria": "{n} stars",
+        "starSelectedSuffix": "{n}/5",
+        "starUnselected": "Select",
+        "commentPlaceholder": "Comment (optional)",
+        "saving": "Saving…",
+        "updateButton": "Update rating",
+        "createButton": "Submit rating",
+        "validateStars": "Please select a star rating (1–5).",
+        "saveError": "Failed to save rating",
+        "successMsg": "Rating saved.",
+        "unknownError": "Unknown error"
       }
     },
     "components": {
