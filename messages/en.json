@@ -20,7 +20,8 @@
       "pronunciation": "Pronunciation",
       "notifications": "Notifications",
       "dataExport": "Export Data",
-      "urlAnalyze": "URL Analysis"
+      "urlAnalyze": "URL Analysis",
+      "settings": "Settings"
     },
     "professor": {
       "dashboard": "Dashboard",
@@ -269,6 +270,15 @@
         "eventFeedbackReceived": "Feedback received",
         "eventBadgeEarned": "Badge earned",
         "eventPeerReviewAssigned": "Peer review assigned"
+      },
+      "settings": {
+        "title": "Settings",
+        "subtitle": "Tune your learning environment to your taste.",
+        "soundTitle": "Sound effects",
+        "soundSubtitle": "Plays a short sound at gamification moments — error cards generated, badges earned, level-ups, and more.",
+        "soundReady": "Sound is ready. You'll hear it during learning actions.",
+        "soundPendingInteraction": "Due to browser policy, sound activates after your first click.",
+        "soundOff": "Sound effects are off — gamification sounds will not play."
       },
       "peerReviewForm": {
         "formTitle": "Write peer feedback",

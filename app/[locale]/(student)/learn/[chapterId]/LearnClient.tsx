@@ -5,6 +5,7 @@ import DocumentEditor from "@/components/learn/DocumentEditor";
 import AnnotatedText from "@/components/learn/AnnotatedText";
 import ErrorPanel from "@/components/learn/ErrorPanel";
 import TutorChat from "@/components/learn/TutorChat";
+import { useSound } from "@/components/gamification/SoundManager";
 import type { AnalysisResponse, AnalyzeRequest } from "@/types";
 
 type Tab = "doc" | "errors" | "chat";
@@ -17,17 +18,22 @@ interface Props {
 export default function LearnClient({ classId, chapterId }: Props) {
   const t = useTranslations("pages.student.learn");
   const chapterNumber = Number(chapterId);
+  const { play } = useSound();
   const [tab, setTab] = useState<Tab>("doc");
   const [draft, setDraft] = useState("");
   const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [focusedErrorId, setFocusedErrorId] = useState<number | null>(null);
+  // 한 번이라도 분석 결과를 받은 적이 있으면 다음 분석은 "수정고" 로 간주.
+  // (오류 0개 수정고 → correct.mp3, Wunote.md 559)
+  const [hasSubmittedBefore, setHasSubmittedBefore] = useState(false);
 
   async function analyze() {
     if (!draft.trim() || analyzing) return;
     setAnalyzing(true);
     setError(null);
+    const isRevision = hasSubmittedBefore;
     try {
       const body: Partial<AnalyzeRequest> = {
         classId,
@@ -46,6 +52,14 @@ export default function LearnClient({ classId, chapterId }: Props) {
       const data = (await res.json()) as AnalysisResponse;
       setAnalysis(data);
       setFocusedErrorId(null);
+      setHasSubmittedBefore(true);
+
+      const errorCount = data.errors?.length ?? 0;
+      if (isRevision && errorCount === 0) {
+        play("correct");
+      } else if (errorCount > 0) {
+        play("errorFound");
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : t("unknownError"));
     } finally {

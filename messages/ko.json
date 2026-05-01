@@ -20,7 +20,8 @@
       "pronunciation": "발음 연습",
       "notifications": "알림 설정",
       "dataExport": "데이터 내보내기",
-      "urlAnalyze": "URL 분석"
+      "urlAnalyze": "URL 분석",
+      "settings": "환경설정"
     },
     "professor": {
       "dashboard": "대시보드",
@@ -269,6 +270,15 @@
         "eventFeedbackReceived": "피드백 수신",
         "eventBadgeEarned": "배지 획득",
         "eventPeerReviewAssigned": "동료 평가 배정"
+      },
+      "settings": {
+        "title": "환경설정",
+        "subtitle": "학습 환경을 내 취향에 맞게 조정합니다.",
+        "soundTitle": "효과음",
+        "soundSubtitle": "오류 카드 생성, 배지 획득, 레벨업 등 게이미피케이션 순간에 짧은 사운드를 재생합니다.",
+        "soundReady": "사운드가 준비되었습니다. 학습 활동 시 자동으로 재생됩니다.",
+        "soundPendingInteraction": "브라우저 정책상 첫 클릭 후부터 사운드가 활성화됩니다.",
+        "soundOff": "효과음이 꺼져 있어 게이미피케이션 사운드가 재생되지 않습니다."
       },
       "peerReviewForm": {
         "formTitle": "동료 피드백 작성",

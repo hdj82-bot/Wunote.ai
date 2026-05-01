@@ -20,7 +20,8 @@
       "pronunciation": "発音練習",
       "notifications": "通知設定",
       "dataExport": "データ書き出し",
-      "urlAnalyze": "URL 分析"
+      "urlAnalyze": "URL 分析",
+      "settings": "環境設定"
     },
     "professor": {
       "dashboard": "ダッシュボード",
@@ -269,6 +270,15 @@
         "eventFeedbackReceived": "フィードバック受信",
         "eventBadgeEarned": "バッジ獲得",
         "eventPeerReviewAssigned": "ピアレビューの割り当て"
+      },
+      "settings": {
+        "title": "環境設定",
+        "subtitle": "学習環境をお好みに合わせて調整します。",
+        "soundTitle": "効果音",
+        "soundSubtitle": "エラーカード生成、バッジ獲得、レベルアップなどゲーミフィケーションの瞬間に短い効果音を再生します。",
+        "soundReady": "サウンドの準備ができました。学習中に自動で再生されます。",
+        "soundPendingInteraction": "ブラウザポリシーにより、最初のクリック以降にサウンドが有効になります。",
+        "soundOff": "効果音はオフです。ゲーミフィケーションサウンドは再生されません。"
       },
       "peerReviewForm": {
         "formTitle": "ピアフィードバックを書く",
