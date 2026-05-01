@@ -17,21 +17,42 @@ function getClient(): Anthropic {
 
 type SystemInput = string | Anthropic.TextBlockParam[]
 
+/**
+ * cacheSystem 값 의미
+ * - false / undefined: 캐싱 비활성
+ * - true / '5m': 5분 TTL (write 1.25x, read 0.1x). 챕터 프롬프트 등 일반적 안정 시스템 프롬프트.
+ * - '1h': 1시간 TTL (write 2x, read 0.1x). 코퍼스 RAG·루브릭처럼 갱신 빈도가 매우 낮은 큰 프롬프트.
+ *
+ * SDK 0.92.0 부터 prompt caching 은 GA 이며, ttl 필드는 'ephemeral' 타입의 정식 옵션이다.
+ * 최소 캐시 가능 prefix 는 4096 토큰 (Opus 4.7) — 그 미만은 silent miss 가 된다.
+ */
+export type CacheTier = boolean | '5m' | '1h'
+
 export interface CompleteOptions {
   system: SystemInput
   messages: Anthropic.MessageParam[]
   maxTokens?: number
-  cacheSystem?: boolean
+  cacheSystem?: CacheTier
   thinking?: boolean
 }
 
-function toSystemBlocks(system: SystemInput, cache: boolean | undefined): Anthropic.TextBlockParam[] {
+function toCacheControl(cache: CacheTier | undefined):
+  | { type: 'ephemeral' }
+  | { type: 'ephemeral'; ttl: '1h' }
+  | undefined {
+  if (!cache) return undefined
+  if (cache === '1h') return { type: 'ephemeral', ttl: '1h' }
+  return { type: 'ephemeral' }
+}
+
+function toSystemBlocks(system: SystemInput, cache: CacheTier | undefined): Anthropic.TextBlockParam[] {
   const blocks: Anthropic.TextBlockParam[] = typeof system === 'string'
     ? [{ type: 'text', text: system }]
     : system.map(b => ({ ...b }))
-  if (cache && blocks.length > 0) {
+  const cacheControl = toCacheControl(cache)
+  if (cacheControl && blocks.length > 0) {
     const last = blocks[blocks.length - 1]
-    blocks[blocks.length - 1] = { ...last, cache_control: { type: 'ephemeral' } }
+    blocks[blocks.length - 1] = { ...last, cache_control: cacheControl }
   }
   return blocks
 }
