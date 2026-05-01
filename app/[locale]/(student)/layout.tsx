@@ -5,6 +5,7 @@ import LevelBar from "@/components/gamification/LevelBar";
 import StreakCounter from "@/components/gamification/StreakCounter";
 import StudentSoundShell from "@/components/gamification/StudentSoundShell";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import StudentMobileNav from "@/components/StudentMobileNav";
 
 interface GameStats {
   level: 1 | 2 | 3 | 4;
@@ -90,6 +91,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
     getTranslations("nav.student"),
   ]);
   const tMeta = await getTranslations("meta");
+  const mobileNavItems = NAV.map((n) => ({ href: n.href, label: t(n.key) }));
 
   return (
     <StudentSoundShell
@@ -99,6 +101,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
     >
       <div className="flex min-h-dvh flex-col bg-slate-100">
         <header className="flex items-center gap-3 border-b bg-white px-4 py-2">
+          <StudentMobileNav
+            items={mobileNavItems}
+            openLabel={t("menuOpen")}
+            closeLabel={t("menuClose")}
+          />
           <Link href="/learn/1" className="text-sm font-bold text-indigo-600">
             {tMeta("appName")}
           </Link>

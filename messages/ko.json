@@ -21,7 +21,9 @@
       "notifications": "알림 설정",
       "dataExport": "데이터 내보내기",
       "urlAnalyze": "URL 분석",
-      "settings": "환경설정"
+      "settings": "환경설정",
+      "menuOpen": "메뉴 열기",
+      "menuClose": "메뉴 닫기"
     },
     "professor": {
       "dashboard": "대시보드",
