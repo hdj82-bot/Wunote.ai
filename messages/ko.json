@@ -99,7 +99,12 @@
         "tabDoc": "문서",
         "tabErrors": "오류",
         "tabChat": "채팅",
-        "tabNavAria": "뷰 전환"
+        "tabNavAria": "뷰 전환",
+        "tabs": {
+          "document": "문서",
+          "errors": "오류",
+          "chat": "채팅"
+        }
       },
       "errors": {
         "title": "오류 기록",

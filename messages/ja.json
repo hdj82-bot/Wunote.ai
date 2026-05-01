@@ -99,7 +99,12 @@
         "tabDoc": "文書",
         "tabErrors": "エラー",
         "tabChat": "チャット",
-        "tabNavAria": "ビュー切替"
+        "tabNavAria": "ビュー切替",
+        "tabs": {
+          "document": "文書",
+          "errors": "エラー",
+          "chat": "チャット"
+        }
       },
       "errors": {
         "title": "エラー記録",
