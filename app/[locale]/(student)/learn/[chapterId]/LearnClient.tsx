@@ -87,9 +87,9 @@ export default function LearnClient({ classId, chapterId }: Props) {
         )}
       </header>
 
-      <main className="min-h-0 flex-1 overflow-hidden md:grid md:grid-cols-2 md:grid-rows-2">
+      <main className="min-h-0 flex-1 overflow-hidden sm:grid sm:grid-cols-2 sm:grid-rows-2">
         <section
-          className={`${tab === "doc" ? "" : "hidden md:block"} h-full overflow-hidden md:col-start-1 md:row-span-2`}
+          className={`${tab === "doc" ? "" : "hidden sm:block"} h-full overflow-hidden sm:col-start-1 sm:row-span-2`}
         >
           {analysis ? (
             <div className="flex h-full flex-col bg-white">
@@ -123,7 +123,7 @@ export default function LearnClient({ classId, chapterId }: Props) {
         </section>
 
         <section
-          className={`${tab === "errors" ? "" : "hidden md:block"} h-full overflow-hidden border-l md:col-start-2 md:row-start-1`}
+          className={`${tab === "errors" ? "" : "hidden sm:block"} h-full overflow-hidden sm:col-start-2 sm:row-start-1 sm:border-l`}
         >
           <ErrorPanel
             analysis={analysis}
@@ -134,27 +134,35 @@ export default function LearnClient({ classId, chapterId }: Props) {
         </section>
 
         <section
-          className={`${tab === "chat" ? "" : "hidden md:block"} h-full overflow-hidden border-l border-t md:col-start-2 md:row-start-2`}
+          className={`${tab === "chat" ? "" : "hidden sm:block"} h-full overflow-hidden sm:col-start-2 sm:row-start-2 sm:border-l sm:border-t`}
         >
           <TutorChat focusedError={focusedError} chapterNumber={chapterNumber} />
         </section>
       </main>
 
-      <nav className="grid grid-cols-3 border-t bg-white md:hidden" aria-label={t("tabNavAria")}>
+      <nav
+        className="grid grid-cols-3 border-t bg-white sm:hidden"
+        role="tablist"
+        aria-label={t("tabNavAria")}
+      >
         {(
           [
-            { id: "doc", label: t("tabDoc") },
-            { id: "errors", label: t("tabErrors") },
-            { id: "chat", label: t("tabChat") },
+            { id: "doc", label: t("tabs.document") },
+            { id: "errors", label: t("tabs.errors") },
+            { id: "chat", label: t("tabs.chat") },
           ] as const
         ).map((tab2) => (
           <button
             key={tab2.id}
             type="button"
+            role="tab"
             onClick={() => setTab(tab2.id)}
+            aria-selected={tab === tab2.id}
             aria-pressed={tab === tab2.id}
-            className={`py-3 text-sm font-medium ${
-              tab === tab2.id ? "bg-indigo-50 text-indigo-700" : "text-slate-600"
+            className={`py-3 text-sm font-medium transition-colors ${
+              tab === tab2.id
+                ? "bg-indigo-50 text-indigo-700"
+                : "text-slate-600 hover:bg-slate-50"
             }`}
           >
             {tab2.label}

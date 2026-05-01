@@ -99,7 +99,12 @@
         "tabDoc": "Doc",
         "tabErrors": "Errors",
         "tabChat": "Chat",
-        "tabNavAria": "Switch view"
+        "tabNavAria": "Switch view",
+        "tabs": {
+          "document": "Document",
+          "errors": "Errors",
+          "chat": "Chat"
+        }
       },
       "errors": {
         "title": "Error log",
