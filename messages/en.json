@@ -21,7 +21,9 @@
       "notifications": "Notifications",
       "dataExport": "Export Data",
       "urlAnalyze": "URL Analysis",
-      "settings": "Settings"
+      "settings": "Settings",
+      "menuOpen": "Open menu",
+      "menuClose": "Close menu"
     },
     "professor": {
       "dashboard": "Dashboard",

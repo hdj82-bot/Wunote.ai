@@ -21,7 +21,9 @@
       "notifications": "通知設定",
       "dataExport": "データ書き出し",
       "urlAnalyze": "URL 分析",
-      "settings": "環境設定"
+      "settings": "環境設定",
+      "menuOpen": "メニューを開く",
+      "menuClose": "メニューを閉じる"
     },
     "professor": {
       "dashboard": "ダッシュボード",
