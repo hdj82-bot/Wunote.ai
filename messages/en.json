@@ -19,7 +19,8 @@
       "peerReview": "Peer Review",
       "pronunciation": "Pronunciation",
       "notifications": "Notifications",
-      "dataExport": "Export Data"
+      "dataExport": "Export Data",
+      "urlAnalyze": "URL Analysis"
     },
     "professor": {
       "dashboard": "Dashboard",
@@ -116,6 +117,34 @@
         "chartAriaRecent30": "Error trend (last 30 days)",
         "chartTooltip": "{date}: {count}",
         "unclassified": "(Unclassified)"
+      },
+      "urlAnalyze": {
+        "title": "URL Vocabulary & Register Analysis",
+        "subtitle": "Paste a Chinese news, Weibo, or Xiaohongshu URL — we'll extract the body and surface high-value expressions with register and HSK level annotations.",
+        "urlLabel": "URL to analyze",
+        "urlPlaceholder": "https://www.xinhuanet.com/...",
+        "supportedSourcesHint": "Supported: Xinhua, People's Daily, Weibo, Xiaohongshu, and general Chinese pages",
+        "convertToCardsLabel": "Also return results in error-card format",
+        "analyze": "Analyze",
+        "analyzing": "Analyzing…",
+        "genericError": "Analysis failed",
+        "resultHeading": "Analysis result",
+        "estimatedHsk": "Estimated HSK level: {level}",
+        "viewSource": "View source →",
+        "studyPointsHeading": "Study points",
+        "annotationsHeading": "Vocabulary annotations",
+        "slangHeading": "Internet slang",
+        "cardsConverted": "{count} items converted to error-card format",
+        "cardsConvertedHint": "Returned in the response's `cards` field. (Saving is a separate step.)",
+        "historyTitle": "Recent analyses",
+        "emptyState": "No analyses yet. Try entering a URL above.",
+        "annotationsCount": "{count} annotations",
+        "source": {
+          "news": "News",
+          "weibo": "Weibo",
+          "xiaohongshu": "Xiaohongshu",
+          "other": "General"
+        }
       },
       "cardnews": {
         "title": "Weekly Card News",

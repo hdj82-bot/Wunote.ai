@@ -19,7 +19,8 @@
       "peerReview": "ピアレビュー",
       "pronunciation": "発音練習",
       "notifications": "通知設定",
-      "dataExport": "データ書き出し"
+      "dataExport": "データ書き出し",
+      "urlAnalyze": "URL 分析"
     },
     "professor": {
       "dashboard": "ダッシュボード",
@@ -116,6 +117,34 @@
         "chartAriaRecent30": "直近30日のエラー推移",
         "chartTooltip": "{date}: {count}件",
         "unclassified": "(未分類)"
+      },
+      "urlAnalyze": {
+        "title": "URL 語彙・文体分析",
+        "subtitle": "中国語ニュース・Weibo・小紅書 (Xiaohongshu) の URL を入力すると、本文から学習価値の高い表現を抽出し、文体や HSK レベルの注釈とともに表示します。",
+        "urlLabel": "分析する URL",
+        "urlPlaceholder": "https://www.xinhuanet.com/...",
+        "supportedSourcesHint": "対応: 新華社・人民日報・Weibo・小紅書 ほか中国語一般ページ",
+        "convertToCardsLabel": "分析結果を誤りカード形式でも受け取る",
+        "analyze": "分析する",
+        "analyzing": "分析中…",
+        "genericError": "分析に失敗しました",
+        "resultHeading": "分析結果",
+        "estimatedHsk": "推定 HSK レベル: {level}",
+        "viewSource": "原文を見る →",
+        "studyPointsHeading": "学習ポイント",
+        "annotationsHeading": "語彙注釈",
+        "slangHeading": "ネット流行語",
+        "cardsConverted": "{count} 件を誤りカード形式に変換しました",
+        "cardsConvertedHint": "レスポンスの cards フィールドで返却されます。(保存は別工程)",
+        "historyTitle": "最近の分析履歴",
+        "emptyState": "まだ分析履歴がありません。上から URL を入力してください。",
+        "annotationsCount": "注釈 {count} 件",
+        "source": {
+          "news": "ニュース",
+          "weibo": "Weibo",
+          "xiaohongshu": "小紅書",
+          "other": "一般"
+        }
       },
       "cardnews": {
         "title": "週間カードニュース",
