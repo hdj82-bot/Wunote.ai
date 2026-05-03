@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
 import OfflineIndicator from "@/components/OfflineIndicator";
+import OfflineQueueFlusher from "@/components/OfflineQueueFlusher";
 
 export const viewport: Viewport = {
   themeColor: "#4F46E5",
@@ -34,6 +35,7 @@ export default async function RootLayout({
       <body>
         {children}
         <OfflineIndicator />
+        <OfflineQueueFlusher />
       </body>
     </html>
   );

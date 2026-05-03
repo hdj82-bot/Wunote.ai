@@ -5,6 +5,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import AnnotatedText from "@/components/learn/AnnotatedText";
 import ErrorPanel from "@/components/learn/ErrorPanel";
+import { fetchOrEnqueue, isQueuedSentinel } from "@/lib/offline-queue";
 import type { AnalysisResponse } from "@/types";
 import type {
   Assignment,
@@ -50,11 +51,19 @@ export default function SubmitClient({
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/assignments/${assignment.id}/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ draftText: draft }),
-      });
+      const res = await fetchOrEnqueue(
+        `/api/assignments/${assignment.id}/submit`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ draftText: draft }),
+        },
+        { kind: "submit", label: `과제 제출 — ${assignment.id}` }
+      );
+      if (isQueuedSentinel(res)) {
+        setError("오프라인 — 연결되면 자동으로 다시 제출합니다.");
+        return;
+      }
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? t("submitFailed"));
       setResult(json as SubmitResult);
