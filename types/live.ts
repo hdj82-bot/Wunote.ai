@@ -167,3 +167,35 @@ export interface LiveSessionUpdateEvent {
   ended_at: string | null
   grammar_focus: string | null
 }
+
+// ============================================================
+// Phase 4-A — 학생 작성 텍스트 broadcast (Supabase Realtime broadcast 채널)
+// ============================================================
+
+/** 학생 → 교수자: 현재 작성 중 텍스트 스냅샷. 1s debounce 후 전송. */
+export interface LiveTypingPayload {
+  student_id: string
+  /** 표시명. 학생 자신이 입력한 profiles.name (없으면 빈 문자열). */
+  name: string
+  /** 현재 작성 중 본문. 길이 ≤ 4000자. 빈 문자열 허용(작성 중단 알림). */
+  text: string
+  /** 단말 기준 ISO timestamp. 후에 들어온 동일 student_id 페이로드를 식별하기 위함. */
+  ts: string
+}
+
+/** 교수자가 수업 시작/종료 신호를 학생들에게 보낼 때 쓰는 broadcast 페이로드. */
+export interface LiveControlPayload {
+  /** 'started' = 학생측 입력창 활성화, 'ended' = 입력창 비활성화 + 마지막 화면 캡처 */
+  type: 'started' | 'ended'
+  session_id: string | null
+  ts: string
+}
+
+/** 교수자 화면이 메모리에 들고 있는 학생별 최근 스냅샷. */
+export interface LiveStudentSnapshot {
+  student_id: string
+  name: string
+  text: string
+  /** 마지막 broadcast 수신 ts (ISO). UI 정렬·stale 표시용. */
+  last_seen: string
+}
