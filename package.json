@@ -13,7 +13,10 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:debug": "playwright test --debug"
+    "test:e2e:debug": "playwright test --debug",
+    "icons:build": "powershell -ExecutionPolicy Bypass -File scripts/generate-icons.ps1",
+    "sounds:gen": "powershell -ExecutionPolicy Bypass -File scripts/generate-sounds.ps1",
+    "sounds:build": "node scripts/build-sounds.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
