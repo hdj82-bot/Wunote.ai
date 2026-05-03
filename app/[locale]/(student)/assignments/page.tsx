@@ -47,7 +47,7 @@ export default async function StudentAssignmentsPage() {
             {t("emptyPending")}
           </p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="grid gap-2 md:grid-cols-2">
             {pending.map((i) => (
               <li key={i.assignment.id}>
                 <Link href={`/assignments/${i.assignment.id}`}>
@@ -75,7 +75,7 @@ export default async function StudentAssignmentsPage() {
             {t("emptySubmitted")}
           </p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="grid gap-2 md:grid-cols-2">
             {submitted.map((i) => (
               <li key={i.assignment.id}>
                 <Link href={`/assignments/${i.assignment.id}`}>

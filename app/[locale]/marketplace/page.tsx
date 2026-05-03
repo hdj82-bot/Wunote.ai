@@ -89,7 +89,7 @@ export default async function MarketplacePage({
           {t('emptyState')}
         </p>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2">
+        <ul className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
           {items.map(item => (
             <li key={item.id}>
               <Link href={`/marketplace/${item.id}`} className="block">
