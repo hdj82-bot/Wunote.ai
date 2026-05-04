@@ -276,7 +276,38 @@
         "eventAssignmentCreated": "New assignment posted",
         "eventFeedbackReceived": "Feedback received",
         "eventBadgeEarned": "Badge earned",
-        "eventPeerReviewAssigned": "Peer review assigned"
+        "eventPeerReviewAssigned": "Peer review assigned",
+        "inbox": {
+          "title": "In-app notifications",
+          "subtitle": "Notifications we've sent you inside Wunote.",
+          "empty": "No notifications yet.",
+          "emptyUnread": "No unread notifications.",
+          "loading": "Loading…",
+          "refresh": "Refresh",
+          "markAll": "Mark all read",
+          "marking": "Marking…",
+          "filterAll": "All",
+          "filterUnread": "Unread",
+          "open": "Open",
+          "unread": "Unread",
+          "loadError": "Failed to load notifications."
+        }
+      },
+      "weeklySuggestions": {
+        "title": "Weekly study suggestions",
+        "subtitle": "Each week, our AI reviews your activity and suggests next steps.",
+        "empty": "No study suggestions yet. Reports are generated every Monday at 09:00 KST.",
+        "noHeadline": "(no summary)",
+        "weekOf": "Week of {date}",
+        "summary": "{sessions} sessions · {errors} errors",
+        "backToList": "Back to list",
+        "statSessions": "Sessions",
+        "statErrors": "Errors",
+        "statImprovement": "Improvement",
+        "focusAreas": "Focus areas this week",
+        "activities": "Recommended activities",
+        "fossilization": "Fossilization watch",
+        "fossilCount": "{count}×"
       },
       "settings": {
         "title": "Settings",
@@ -689,6 +720,23 @@
         "fullviewLastSeen": "Last update",
         "anonymous": "Anonymous",
         "confirmEnd": "End the class?"
+      },
+      "notifications": {
+        "inbox": {
+          "title": "Inbox",
+          "subtitle": "Notifications we've sent you inside Wunote.",
+          "empty": "No notifications yet.",
+          "emptyUnread": "No unread notifications.",
+          "loading": "Loading…",
+          "refresh": "Refresh",
+          "markAll": "Mark all read",
+          "marking": "Marking…",
+          "filterAll": "All",
+          "filterUnread": "Unread",
+          "open": "Open",
+          "unread": "Unread",
+          "loadError": "Failed to load notifications."
+        }
       }
     },
     "marketplace": {

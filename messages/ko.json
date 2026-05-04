@@ -276,7 +276,38 @@
         "eventAssignmentCreated": "새 과제 등록",
         "eventFeedbackReceived": "피드백 수신",
         "eventBadgeEarned": "배지 획득",
-        "eventPeerReviewAssigned": "동료 평가 배정"
+        "eventPeerReviewAssigned": "동료 평가 배정",
+        "inbox": {
+          "title": "인앱 알림",
+          "subtitle": "Wunote 안에서 보내드린 알림을 확인할 수 있습니다.",
+          "empty": "받은 알림이 없습니다.",
+          "emptyUnread": "읽지 않은 알림이 없습니다.",
+          "loading": "불러오는 중…",
+          "refresh": "새로고침",
+          "markAll": "모두 읽음",
+          "marking": "처리 중…",
+          "filterAll": "전체",
+          "filterUnread": "안 읽음",
+          "open": "열기",
+          "unread": "안 읽음",
+          "loadError": "알림을 불러오지 못했습니다."
+        }
+      },
+      "weeklySuggestions": {
+        "title": "주간 학습 제안",
+        "subtitle": "지난 한 주 활동을 토대로 AI 가 다음 주 학습 방향을 제안합니다.",
+        "empty": "아직 생성된 학습 제안이 없습니다. 매주 월요일 09:00 에 자동 생성됩니다.",
+        "noHeadline": "(요약 없음)",
+        "weekOf": "{date} 주",
+        "summary": "세션 {sessions}회 · 오류 {errors}건",
+        "backToList": "목록으로",
+        "statSessions": "세션",
+        "statErrors": "오류",
+        "statImprovement": "개선율",
+        "focusAreas": "이번 주 집중 영역",
+        "activities": "권장 활동",
+        "fossilization": "화석화 주의",
+        "fossilCount": "{count}회"
       },
       "settings": {
         "title": "환경설정",
@@ -689,6 +720,23 @@
         "fullviewLastSeen": "마지막 갱신",
         "anonymous": "익명",
         "confirmEnd": "수업을 종료하시겠습니까?"
+      },
+      "notifications": {
+        "inbox": {
+          "title": "알림함",
+          "subtitle": "Wunote 안에서 보내드린 알림을 확인할 수 있습니다.",
+          "empty": "받은 알림이 없습니다.",
+          "emptyUnread": "읽지 않은 알림이 없습니다.",
+          "loading": "불러오는 중…",
+          "refresh": "새로고침",
+          "markAll": "모두 읽음",
+          "marking": "처리 중…",
+          "filterAll": "전체",
+          "filterUnread": "안 읽음",
+          "open": "열기",
+          "unread": "안 읽음",
+          "loadError": "알림을 불러오지 못했습니다."
+        }
       }
     },
     "marketplace": {

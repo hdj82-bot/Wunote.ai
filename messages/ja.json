@@ -276,7 +276,38 @@
         "eventAssignmentCreated": "新しい課題の登録",
         "eventFeedbackReceived": "フィードバック受信",
         "eventBadgeEarned": "バッジ獲得",
-        "eventPeerReviewAssigned": "ピアレビューの割り当て"
+        "eventPeerReviewAssigned": "ピアレビューの割り当て",
+        "inbox": {
+          "title": "アプリ内通知",
+          "subtitle": "Wunote 内でお送りした通知を確認できます。",
+          "empty": "受信した通知はありません。",
+          "emptyUnread": "未読の通知はありません。",
+          "loading": "読み込み中…",
+          "refresh": "更新",
+          "markAll": "すべて既読",
+          "marking": "処理中…",
+          "filterAll": "すべて",
+          "filterUnread": "未読",
+          "open": "開く",
+          "unread": "未読",
+          "loadError": "通知を読み込めませんでした。"
+        }
+      },
+      "weeklySuggestions": {
+        "title": "週次学習提案",
+        "subtitle": "先週の活動を踏まえ、AI が来週の学習方向を提案します。",
+        "empty": "まだ生成された学習提案はありません。毎週月曜 09:00 KST に自動生成されます。",
+        "noHeadline": "(要約なし)",
+        "weekOf": "{date} の週",
+        "summary": "セッション {sessions}回 · エラー {errors}件",
+        "backToList": "一覧へ戻る",
+        "statSessions": "セッション",
+        "statErrors": "エラー",
+        "statImprovement": "改善率",
+        "focusAreas": "今週の集中領域",
+        "activities": "おすすめの活動",
+        "fossilization": "化石化注意",
+        "fossilCount": "{count}回"
       },
       "settings": {
         "title": "環境設定",
@@ -689,6 +720,23 @@
         "fullviewLastSeen": "最終更新",
         "anonymous": "匿名",
         "confirmEnd": "授業を終了しますか?"
+      },
+      "notifications": {
+        "inbox": {
+          "title": "通知ボックス",
+          "subtitle": "Wunote 内でお送りした通知を確認できます。",
+          "empty": "受信した通知はありません。",
+          "emptyUnread": "未読の通知はありません。",
+          "loading": "読み込み中…",
+          "refresh": "更新",
+          "markAll": "すべて既読",
+          "marking": "処理中…",
+          "filterAll": "すべて",
+          "filterUnread": "未読",
+          "open": "開く",
+          "unread": "未読",
+          "loadError": "通知を読み込めませんでした。"
+        }
       }
     },
     "marketplace": {
