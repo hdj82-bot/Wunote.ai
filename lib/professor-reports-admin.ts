@@ -9,7 +9,7 @@
 // 두 파일이 갈라지지 않도록, Claude system prompt 와 parse 로직은 작은 helper 로
 // 단일화하기를 권장(후속 PR).
 
-import { completeJSON } from './claude'
+import { dispatchJSON } from './ai/dispatch'
 import { extractFirstJsonObject } from './parser'
 import { FOSSILIZATION_THRESHOLD } from './fossilization'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -328,12 +328,12 @@ export async function generateWeeklyReportAdmin(
 ): Promise<ProfessorWeeklyReport> {
   const aggregate = await aggregateWeekAdmin(supabase, classId, weekStart)
 
-  const llmOutput = await completeJSON<ClaudeReportOutput>(
+  const llmOutput = await dispatchJSON<ClaudeReportOutput>(
+    'professor-report',
     {
       system: REPORT_SYSTEM_PROMPT,
       messages: [{ role: 'user', content: buildUserPrompt(aggregate) }],
-      maxTokens: 4000,
-      cacheSystem: true
+      maxTokens: 4000
     },
     parseReport
   )
