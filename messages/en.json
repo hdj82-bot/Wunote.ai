@@ -278,8 +278,8 @@
         "eventBadgeEarned": "Badge earned",
         "eventPeerReviewAssigned": "Peer review assigned",
         "inbox": {
-          "title": "In-app notifications",
-          "subtitle": "Notifications we've sent you inside Wunote.",
+          "title": "Inbox",
+          "subtitle": "Weekly study suggestions and other in-app notifications.",
           "empty": "No notifications yet.",
           "emptyUnread": "No unread notifications.",
           "loading": "Loading…",
@@ -295,19 +295,19 @@
       },
       "weeklySuggestions": {
         "title": "Weekly study suggestions",
-        "subtitle": "Each week, our AI reviews your activity and suggests next steps.",
-        "empty": "No study suggestions yet. Reports are generated every Monday at 09:00 KST.",
+        "subtitle": "Each week, our AI reviews your past week and suggests what to focus on next.",
+        "empty": "No suggestions yet. Reports are generated every Monday morning (09:00 KST).",
         "noHeadline": "(no summary)",
         "weekOf": "Week of {date}",
         "summary": "{sessions} sessions · {errors} errors",
         "backToList": "Back to list",
         "statSessions": "Sessions",
         "statErrors": "Errors",
-        "statImprovement": "Improvement",
-        "focusAreas": "Focus areas this week",
+        "statImprovement": "Improvement rate",
+        "focusAreas": "This week's focus areas",
         "activities": "Recommended activities",
-        "fossilization": "Fossilization watch",
-        "fossilCount": "{count}×"
+        "fossilization": "Recurring errors to watch",
+        "fossilCount": "{count}× recurring"
       },
       "settings": {
         "title": "Settings",
@@ -723,8 +723,8 @@
       },
       "notifications": {
         "inbox": {
-          "title": "Inbox",
-          "subtitle": "Notifications we've sent you inside Wunote.",
+          "title": "Notifications",
+          "subtitle": "In-app notifications and weekly report alerts.",
           "empty": "No notifications yet.",
           "emptyUnread": "No unread notifications.",
           "loading": "Loading…",
