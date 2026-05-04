@@ -724,7 +724,7 @@ Claude API로 어휘·문체 분석
 - [x] 예문 북마크
 - [x] 학습 목표 설정·추적
 - [x] 번역 역방향 비교 (DeepL·Papago·GPT)
-- [ ] URL 분석 모드 (뉴스·SNS)
+- [x] URL 분석 모드 (뉴스·SNS)
 - [x] HSK 급수 태그
 - [x] 개인 성장 대시보드·학기 간 비교
 - [x] 교수자 간 마켓플레이스
@@ -844,7 +844,15 @@ KAKAO_API_KEY=
 
 ## Phase 4 (계획)
 
-- 모바일 앱 (React Native)
-- LTI 1.3 표준 연동
-- 다국어 UI
-- AI 튜터 고도화
+- [x] 다국어 UI (next-intl ko/en/ja) — PR #11, #33, #39
+- [x] 실시간 수업 모드 강화 (Supabase Realtime + typing broadcast) — PR #27
+- [x] 주간 AI 학습 제안 + 인앱 알림 인박스 — PR #28
+- [x] PWA 강화 (IndexedDB offline queue, SW v2, iOS splash) — PR #25, #26, #34
+- [x] 보안 (Kakao OAuth 토큰 pgcrypto 암호화) — PR #35
+- [x] AI 모델 라우터 + dispatchJSON wrapper + 1h prompt cache — PR #22, #23, #29, #31
+- [ ] 모바일 앱 (React Native) — 미착수, 우선순위 결정 필요
+- [ ] LTI 1.3 표준 연동 (Canvas/Moodle) — LMS API 위에 어댑터 추가
+- [ ] AI 튜터 고도화 — 추가 범위 정의 필요
+- [ ] 개인정보 처리방침 / 이용약관 페이지
+- [ ] 운영 모니터링 (Sentry, Supabase Realtime quota 알림)
+- [ ] 테스트 커버리지 게이트 (CI에서 vitest coverage 임계값)
