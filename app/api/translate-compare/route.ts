@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAuth, AuthError } from '@/lib/auth'
 import { createServerClient } from '@/lib/supabase'
-import { completeJSON } from '@/lib/claude'
+import { dispatchJSON } from '@/lib/ai/dispatch'
 import { translateWithAllEngines } from '@/lib/translate'
 import type { AnalysisError, CotStep, ErrorType } from '@/types'
 import type {
@@ -225,12 +225,12 @@ export async function POST(req: Request) {
 
   if (successfulCount > 0) {
     try {
-      payload = await completeJSON(
+      payload = await dispatchJSON(
+        'translate-compare',
         {
           system: ANALYSIS_SYSTEM,
           messages: [{ role: 'user', content: buildUserMessage(input.korean, engineResults) }],
           maxTokens: 6000,
-          cacheSystem: true,
           thinking: false
         },
         parseClaudePayload

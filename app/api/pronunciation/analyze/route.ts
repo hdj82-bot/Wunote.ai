@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { completeJSON } from '@/lib/claude'
+import { dispatchJSON } from '@/lib/ai/dispatch'
 import { requireAuth, AuthError } from '@/lib/auth'
 import { computeAccuracy, savePronunciationSession } from '@/lib/pronunciation'
 import { buildPronunciationSystemPrompt, buildPronunciationUserPrompt } from '@/lib/prompts/pronunciation'
@@ -38,7 +38,8 @@ export async function POST(req: Request) {
 
     const wordAccuracy = computeAccuracy(targetText, recognizedText)
 
-    const analysis = await completeJSON<PronunciationAnalysis>(
+    const analysis = await dispatchJSON<PronunciationAnalysis>(
+      'pronunciation',
       {
         system: buildPronunciationSystemPrompt(language),
         messages: [
@@ -48,7 +49,6 @@ export async function POST(req: Request) {
           },
         ],
         maxTokens: 4096,
-        cacheSystem: true,
         thinking: false,
       },
       (raw) => {

@@ -13,7 +13,7 @@ import type {
   WeekStats,
   BarPoint,
 } from '@/types/cardnews'
-import { completeJSON } from './claude'
+import { dispatchJSON } from './ai/dispatch'
 import { extractFirstJsonObject } from './parser'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -417,12 +417,12 @@ function parseClaudeShape(raw: string): ClaudeCardnewsShape {
 // ============================================================
 
 export async function generateCardnewsPayload(stats: WeekStats): Promise<CardnewsPayload> {
-  const shape = await completeJSON<ClaudeCardnewsShape>(
+  const shape = await dispatchJSON<ClaudeCardnewsShape>(
+    'cardnews',
     {
       system: CARDNEWS_SYSTEM,
       messages: [{ role: 'user', content: buildUserPrompt(stats) }],
       maxTokens: 4000,
-      cacheSystem: true,
     },
     parseClaudeShape
   )

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { requireAuth, AuthError } from '@/lib/auth'
 import { createServerClient } from '@/lib/supabase'
-import { completeJSON } from '@/lib/claude'
+import { dispatchJSON } from '@/lib/ai/dispatch'
 import { extractContent, UrlExtractError } from '@/lib/url-extractor'
 import {
   buildUrlAnalyzeSystemPrompt,
@@ -96,7 +96,8 @@ export async function POST(req: Request): Promise<Response> {
   // 2) Claude 분석
   let analysis: UrlAnalysisResult
   try {
-    analysis = await completeJSON<UrlAnalysisResult>(
+    analysis = await dispatchJSON<UrlAnalysisResult>(
+      'url-analyze',
       {
         system: buildUrlAnalyzeSystemPrompt(),
         messages: [
@@ -110,7 +111,6 @@ export async function POST(req: Request): Promise<Response> {
             })
           }
         ],
-        cacheSystem: true,
         maxTokens: 8000
       },
       parseUrlAnalyzeResponse
