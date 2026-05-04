@@ -16,7 +16,8 @@
     "test:e2e:debug": "playwright test --debug",
     "icons:build": "powershell -ExecutionPolicy Bypass -File scripts/generate-icons.ps1",
     "sounds:gen": "powershell -ExecutionPolicy Bypass -File scripts/generate-sounds.ps1",
-    "sounds:build": "node scripts/build-sounds.mjs"
+    "sounds:build": "node scripts/build-sounds.mjs",
+    "pwa:check": "node scripts/check-pwa-manifest.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",
