@@ -969,6 +969,33 @@ export type Database = {
         }
         Relationships: []
       }
+      live_typing_consents: {
+        Row: {
+          id: string
+          class_id: string
+          student_id: string
+          granted_at: string
+          withdrawn_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          class_id: string
+          student_id: string
+          granted_at?: string
+          withdrawn_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          class_id?: string
+          student_id?: string
+          granted_at?: string
+          withdrawn_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       professor_reports_latest: {
