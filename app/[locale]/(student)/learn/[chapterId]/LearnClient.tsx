@@ -6,6 +6,7 @@ import AnnotatedText from "@/components/learn/AnnotatedText";
 import ErrorPanel from "@/components/learn/ErrorPanel";
 import TutorChat from "@/components/learn/TutorChat";
 import { useSound } from "@/components/gamification/SoundManager";
+import { fetchOrEnqueue, isQueuedSentinel } from "@/lib/offline-queue";
 import type { AnalysisResponse, AnalyzeRequest } from "@/types";
 
 type Tab = "doc" | "errors" | "chat";
@@ -40,11 +41,21 @@ export default function LearnClient({ classId, chapterId }: Props) {
         chapterNumber,
         draftText: draft,
       };
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      const res = await fetchOrEnqueue(
+        "/api/analyze",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        },
+        { kind: "analyze", label: `오류카드 — ${chapterId}과` }
+      );
+      if (isQueuedSentinel(res)) {
+        // Network unreachable — request stashed in IDB; the global flusher
+        // toast will tell the user. Bail out without setting analysis state.
+        setError("오프라인 — 연결되면 자동으로 다시 분석합니다.");
+        return;
+      }
       if (!res.ok) {
         const msg = (await res.json().catch(() => null))?.error ?? t("analyzeFailedDefault");
         throw new Error(msg);
