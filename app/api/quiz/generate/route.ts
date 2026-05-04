@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { requireAuth, AuthError } from '@/lib/auth'
 import { createServerClient } from '@/lib/supabase'
-import { completeJSON } from '@/lib/claude'
+import { dispatchJSON } from '@/lib/ai/dispatch'
 import { buildSystemPrompt } from '@/lib/prompts/base'
 import { extractFirstJsonObject } from '@/lib/parser'
 import type { QuizGenerateResponse, QuizQuestion } from '@/types'
@@ -136,12 +136,12 @@ export async function POST(req: Request) {
     `}`
 
   try {
-    const parsed = await completeJSON<QuizGenerateResponse>(
+    const parsed = await dispatchJSON<QuizGenerateResponse>(
+      'quiz-generate',
       {
         system,
         messages: [{ role: 'user', content: userPrompt }],
-        maxTokens: 4000,
-        cacheSystem: true
+        maxTokens: 4000
       },
       raw => {
         const jsonText = extractFirstJsonObject(raw)

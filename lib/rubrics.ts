@@ -1,5 +1,5 @@
 import type Anthropic from '@anthropic-ai/sdk'
-import { completeJSON } from './claude'
+import { dispatchJSON } from './ai/dispatch'
 import { extractFirstJsonObject } from './parser'
 import type {
   Rubric,
@@ -184,12 +184,12 @@ function sanitizeAIResult(raw: unknown, criteria: RubricCriterion[]): RubricAIRe
 export async function evaluateWithRubric(input: EvaluateRubricInput): Promise<RubricAIResult> {
   const system: Anthropic.TextBlockParam[] = [{ type: 'text', text: RUBRIC_SYSTEM }]
 
-  return completeJSON<RubricAIResult>(
+  return dispatchJSON<RubricAIResult>(
+    'rubric-evaluate',
     {
       system,
       messages: [{ role: 'user', content: buildUserPrompt(input) }],
-      maxTokens: 4000,
-      cacheSystem: true
+      maxTokens: 4000
     },
     raw => {
       const jsonText = extractFirstJsonObject(raw)

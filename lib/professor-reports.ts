@@ -1,7 +1,7 @@
 // Wunote Phase 2 — 교수자 주간 리포트 생성 헬퍼
 // DB 집계 + Claude 기반 5블록 리포트 생성 + 저장.
 
-import { completeJSON } from './claude'
+import { dispatchJSON } from './ai/dispatch'
 import { createServerClient } from './supabase'
 import { extractFirstJsonObject } from './parser'
 import { FOSSILIZATION_THRESHOLD } from './fossilization'
@@ -358,12 +358,12 @@ export async function generateWeeklyReport(
 ): Promise<ProfessorWeeklyReport> {
   const aggregate = await aggregateWeek(classId, weekStart)
 
-  const llmOutput = await completeJSON<ClaudeReportOutput>(
+  const llmOutput = await dispatchJSON<ClaudeReportOutput>(
+    'professor-report',
     {
       system: REPORT_SYSTEM_PROMPT,
       messages: [{ role: 'user', content: buildUserPrompt(aggregate) }],
-      maxTokens: 4000,
-      cacheSystem: true
+      maxTokens: 4000
     },
     parseReport
   )
