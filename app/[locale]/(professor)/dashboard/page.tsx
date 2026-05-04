@@ -221,7 +221,7 @@ export default async function DashboardPage() {
             {t('emptyClasses')}
           </p>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
             {classes.map(c => {
               const latest = latestReports.get(c.id)
               const fossils = fossilByClass.get(c.id) ?? []
