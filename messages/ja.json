@@ -97,6 +97,7 @@
         "analysisResult": "解析結果",
         "editAgain": "編集する →",
         "analyzeFailedDefault": "解析リクエストに失敗しました。",
+        "offlineQueued": "オフラインです — 接続が回復したら自動で再解析します。",
         "unknownError": "不明なエラーが発生しました。",
         "tabDoc": "文書",
         "tabErrors": "エラー",
@@ -370,6 +371,7 @@
         "draftAriaLabel": "中国語テキスト入力",
         "confirmResubmit": "すでに提出済みの課題です。再提出すると以前の記録が上書きされます。続けますか？",
         "submitFailed": "提出に失敗しました",
+        "offlineQueued": "オフラインです — 接続が回復したら自動で再提出します。",
         "rubricTitle": "ルーブリック採点",
         "colCriterion": "項目",
         "colScore": "点数",
@@ -822,6 +824,12 @@
         "analyzing": "解析中…",
         "submit": "再解析",
         "ariaLabel": "中国語の文を入力"
+      },
+      "offlineQueue": {
+        "queued": "オフラインです — {count}件の保留中。接続が回復すると自動送信します。",
+        "syncing": "保留中のリクエストを送信中…",
+        "synced": "{count}件の送信に成功しました。",
+        "failed": "{count}件の送信に失敗しました。再試行します。"
       }
     }
   }

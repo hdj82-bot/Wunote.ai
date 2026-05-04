@@ -53,7 +53,7 @@ export default function LearnClient({ classId, chapterId }: Props) {
       if (isQueuedSentinel(res)) {
         // Network unreachable — request stashed in IDB; the global flusher
         // toast will tell the user. Bail out without setting analysis state.
-        setError("오프라인 — 연결되면 자동으로 다시 분석합니다.");
+        setError(t("offlineQueued"));
         return;
       }
       if (!res.ok) {

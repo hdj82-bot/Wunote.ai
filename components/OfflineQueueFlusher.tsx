@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { flushOfflineQueue, subscribeOfflineQueue } from '@/lib/offline-queue'
 
 /**
@@ -18,6 +19,7 @@ type Toast =
   | { kind: 'failed'; count: number }
 
 export default function OfflineQueueFlusher() {
+  const t = useTranslations('components.offlineQueue')
   const [pending, setPending] = useState(0)
   const [toast, setToast] = useState<Toast | null>(null)
 
@@ -38,8 +40,8 @@ export default function OfflineQueueFlusher() {
   useEffect(() => {
     if (!toast) return
     if (toast.kind === 'queued' || toast.kind === 'syncing') return
-    const t = setTimeout(() => setToast(null), 4000)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => setToast(null), 4000)
+    return () => clearTimeout(timer)
   }, [toast])
 
   // Flush on `online` event AND once on mount (in case we came back before
@@ -93,17 +95,14 @@ export default function OfflineQueueFlusher() {
 
   if (!toast) return null
 
-  // Korean strings — keeps this PR self-contained and avoids racing the
-  // i18n message files which other windows are concurrently editing.
-  // (Other UI in the app already mixes inline ko strings in the same way.)
   const message =
     toast.kind === 'queued'
-      ? `오프라인 — ${toast.count}건 대기 중. 연결되면 자동 전송됩니다.`
+      ? t('queued', { count: toast.count })
       : toast.kind === 'syncing'
-        ? '대기 중인 요청을 전송 중…'
+        ? t('syncing')
         : toast.kind === 'synced'
-          ? `${toast.count}건이 성공적으로 전송되었습니다.`
-          : `${toast.count}건 전송 실패. 다시 시도하겠습니다.`
+          ? t('synced', { count: toast.count })
+          : t('failed', { count: toast.count })
 
   const tone =
     toast.kind === 'queued' || toast.kind === 'syncing'
