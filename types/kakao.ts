@@ -39,15 +39,25 @@ export interface KakaoUserInfoResponse {
   }
 }
 
-/** Row shape of public.notification_settings. */
+/** Row shape of public.notification_settings (post-encryption migration). */
 export interface NotificationSettingsRow {
   id: string
   user_id: string
-  kakao_access_token: string | null
-  kakao_refresh_token: string | null
+  /** pgcrypto-encrypted Kakao access token (bytea, surfaced as base64-ish string). */
+  kakao_access_token_enc: string | null
+  /** pgcrypto-encrypted Kakao refresh token. */
+  kakao_refresh_token_enc: string | null
   kakao_user_id: string | null
   enabled_events: KakaoEnabledEvents
   created_at: string
+}
+
+/** Decrypted token bundle returned by the kakao_get_tokens RPC. */
+export interface KakaoDecryptedTokens {
+  access_token: string | null
+  refresh_token: string | null
+  kakao_user_id: string | null
+  enabled_events: KakaoEnabledEvents
 }
 
 /** Per-event toggle map stored as JSONB in notification_settings. */

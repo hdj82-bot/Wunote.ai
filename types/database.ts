@@ -856,8 +856,8 @@ export type Database = {
         Row: {
           id: string
           user_id: string
-          kakao_access_token: string | null
-          kakao_refresh_token: string | null
+          kakao_access_token_enc: string | null
+          kakao_refresh_token_enc: string | null
           kakao_user_id: string | null
           enabled_events: Json
           created_at: string
@@ -865,8 +865,8 @@ export type Database = {
         Insert: {
           id?: string
           user_id: string
-          kakao_access_token?: string | null
-          kakao_refresh_token?: string | null
+          kakao_access_token_enc?: string | null
+          kakao_refresh_token_enc?: string | null
           kakao_user_id?: string | null
           enabled_events?: Json
           created_at?: string
@@ -874,8 +874,8 @@ export type Database = {
         Update: {
           id?: string
           user_id?: string
-          kakao_access_token?: string | null
-          kakao_refresh_token?: string | null
+          kakao_access_token_enc?: string | null
+          kakao_refresh_token_enc?: string | null
           kakao_user_id?: string | null
           enabled_events?: Json
           created_at?: string
@@ -1103,6 +1103,29 @@ export type Database = {
       increment_corpus_download: {
         Args: { p_doc_id: string }
         Returns: number
+      }
+      kakao_set_tokens: {
+        Args: {
+          p_user_id: string
+          p_access: string | null
+          p_refresh: string | null
+          p_kakao_user_id: string | null
+          p_key: string
+        }
+        Returns: undefined
+      }
+      kakao_get_tokens: {
+        Args: { p_user_id: string; p_key: string }
+        Returns: {
+          access_token: string | null
+          refresh_token: string | null
+          kakao_user_id: string | null
+          enabled_events: Json
+        }[]
+      }
+      kakao_clear_tokens: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
