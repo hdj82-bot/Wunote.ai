@@ -727,6 +727,7 @@ export type Database = {
           last_used_at: string | null
           rate_window_start: string | null
           rate_window_count: number
+          rate_limit_per_minute: number | null
           created_at: string
           is_active: boolean
         }
@@ -739,6 +740,7 @@ export type Database = {
           last_used_at?: string | null
           rate_window_start?: string | null
           rate_window_count?: number
+          rate_limit_per_minute?: number | null
           created_at?: string
           is_active?: boolean
         }
@@ -751,8 +753,45 @@ export type Database = {
           last_used_at?: string | null
           rate_window_start?: string | null
           rate_window_count?: number
+          rate_limit_per_minute?: number | null
           created_at?: string
           is_active?: boolean
+        }
+        Relationships: []
+      }
+      lms_api_requests: {
+        Row: {
+          id: string
+          key_id: string | null
+          professor_id: string | null
+          endpoint: string
+          method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+          status: number
+          response_ms: number | null
+          error: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          key_id?: string | null
+          professor_id?: string | null
+          endpoint: string
+          method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+          status: number
+          response_ms?: number | null
+          error?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          key_id?: string | null
+          professor_id?: string | null
+          endpoint?: string
+          method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+          status?: number
+          response_ms?: number | null
+          error?: string | null
+          created_at?: string
         }
         Relationships: []
       }
