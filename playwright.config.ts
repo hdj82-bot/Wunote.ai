@@ -54,6 +54,13 @@ export default defineConfig({
       dependencies: ['professor-setup'],
       testMatch: /professor\.spec\.ts/,
     },
+
+    // RLS policy tests — direct PostgREST queries via @supabase/supabase-js.
+    // No browser, no dev server needed. Skipped at runtime if env vars unset.
+    {
+      name: 'rls',
+      testMatch: /rls\.spec\.ts/,
+    },
   ],
 
   // Attach to an already-running dev server; start one if not running
