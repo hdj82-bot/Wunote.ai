@@ -89,8 +89,9 @@ export function SoundProvider({ children }: ProviderProps) {
         useHowlerRef.current = true
         const Howl = mod.Howl
         for (const cfg of Object.values(SOUND_FILES)) {
+          const sources = Array.isArray(cfg.src) ? cfg.src : [cfg.src]
           howlsRef.current[cfg.key] = new Howl({
-            src: [cfg.src],
+            src: sources,
             volume: cfg.volume ?? 1,
             preload: true,
             html5: false
@@ -99,7 +100,9 @@ export function SoundProvider({ children }: ProviderProps) {
       } else {
         useHowlerRef.current = false
         for (const cfg of Object.values(SOUND_FILES)) {
-          const audio = new Audio(cfg.src)
+          // native Audio 폴백: 배열이면 첫 번째 src 사용 (브라우저가 기본 지원하는 wav)
+          const primary = Array.isArray(cfg.src) ? cfg.src[0] : cfg.src
+          const audio = new Audio(primary)
           audio.volume = cfg.volume ?? 1
           audio.preload = 'auto'
           audiosRef.current[cfg.key] = audio

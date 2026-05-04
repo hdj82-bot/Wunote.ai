@@ -14,8 +14,8 @@ export type SoundKey = (typeof SOUND_KEYS)[number]
 
 export interface SoundFileConfig {
   key: SoundKey
-  /** /public 기준 절대 경로 */
-  src: string
+  /** /public 기준 절대 경로. 배열이면 howler 가 브라우저 호환 가능한 첫 항목을 선택한다 (primary→fallback). */
+  src: string | string[]
   /** 0–1 볼륨, 기본 1.0 */
   volume?: number
 }

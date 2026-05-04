@@ -1,13 +1,17 @@
 import type { SoundFileConfig, SoundKey, SoundPreference } from '@/types/sound'
 import { SOUND_DEFAULT_PREFERENCE, SOUND_STORAGE_KEY } from '@/types/sound'
 
-/** 사운드 키 → 파일 경로 매핑. /public/sounds 하위에 실제 mp3 를 배치한다. */
+/** 사운드 키 → 파일 경로 매핑. /public/sounds 하위에 실제 오디오 파일을 배치한다.
+ *
+ *  WAV 가 primary — 모든 모던 브라우저(Chrome/Safari/Edge/Firefox/iOS/Android)가 지원한다.
+ *  MP3 는 fallback — 회선이 매우 좁은 환경에서 howler 가 자동 선택하도록 한다.
+ *  MP3 산출물은 `npm run sounds:build` (ffmpeg 필요) 로 WAV 에서 인코딩한다 — public/sounds/README.md 참조. */
 export const SOUND_FILES: Record<SoundKey, SoundFileConfig> = {
-  correct: { key: 'correct', src: '/sounds/correct.mp3', volume: 0.8 },
-  badge: { key: 'badge', src: '/sounds/badge.mp3', volume: 0.85 },
-  errorFound: { key: 'errorFound', src: '/sounds/error-found.mp3', volume: 0.6 },
-  streak: { key: 'streak', src: '/sounds/streak.mp3', volume: 0.85 },
-  levelUp: { key: 'levelUp', src: '/sounds/level-up.mp3', volume: 0.9 }
+  correct: { key: 'correct', src: ['/sounds/correct.wav', '/sounds/correct.mp3'], volume: 0.8 },
+  badge: { key: 'badge', src: ['/sounds/badge.wav', '/sounds/badge.mp3'], volume: 0.85 },
+  errorFound: { key: 'errorFound', src: ['/sounds/error-found.wav', '/sounds/error-found.mp3'], volume: 0.6 },
+  streak: { key: 'streak', src: ['/sounds/streak.wav', '/sounds/streak.mp3'], volume: 0.85 },
+  levelUp: { key: 'levelUp', src: ['/sounds/level-up.wav', '/sounds/level-up.mp3'], volume: 0.9 }
 }
 
 export function loadSoundPreference(): SoundPreference {
