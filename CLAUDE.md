@@ -3,7 +3,7 @@
 AI-powered Chinese writing error correction PWA for Korean university students.
 Students submit Chinese text → Claude API returns structured error cards → professors see aggregate dashboards.
 
-Full product spec: [Wunote.md](Wunote.md)
+> 공개용 프로젝트 소개는 [README.md](README.md), 전체 제품 명세는 [Wunote.md](Wunote.md) 참고. 이 문서는 개발자(특히 Claude Code) 대상 가이드입니다.
 
 ---
 
