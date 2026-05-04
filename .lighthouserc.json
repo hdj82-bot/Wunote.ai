@@ -1,0 +1,36 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 1,
+      "settings": {
+        "preset": "desktop",
+        "onlyCategories": ["pwa", "performance", "accessibility", "best-practices", "seo"],
+        "skipAudits": [
+          "uses-http2",
+          "is-on-https",
+          "redirects-http",
+          "uses-long-cache-ttl",
+          "canonical"
+        ],
+        "chromeFlags": "--no-sandbox --headless=new --disable-dev-shm-usage"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:pwa": ["error", { "minScore": 0.9 }],
+        "categories:accessibility": ["warn", { "minScore": 0.85 }],
+        "categories:best-practices": ["warn", { "minScore": 0.85 }],
+        "installable-manifest": "error",
+        "service-worker": "error",
+        "apple-touch-icon": "error",
+        "maskable-icon": "error",
+        "themed-omnibox": "error",
+        "viewport": "error",
+        "content-width": "error"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

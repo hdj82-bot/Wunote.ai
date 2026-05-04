@@ -1,0 +1,110 @@
+name: Lighthouse CI
+
+# Per-PR PWA / a11y / best-practices audit. Fails the check if the PWA
+# category score drops below 90 — that's our floor for "this branch is
+# still installable as a PWA on iOS / Android."
+#
+# We don't require a real Supabase / Anthropic API key: build runs with
+# placeholder env vars, and Lighthouse only audits public unauthenticated
+# pages (/ko/login, /manifest.json) where SSR doesn't actually call the
+# external APIs.
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.github/ISSUE_TEMPLATE/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Lighthouse audit (PWA >= 90)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (with placeholder env)
+        env:
+          # createServerClient + createBrowserClient need a syntactically valid
+          # URL but won't actually be hit during `next build` for public pages.
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+          ANTHROPIC_API_KEY: placeholder-anthropic-key
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+        run: npm run build
+
+      - name: Start production server
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+          ANTHROPIC_API_KEY: placeholder-anthropic-key
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+        run: |
+          npm run start &
+          # Wait until the server answers a public route.
+          for i in {1..30}; do
+            if curl -sf http://localhost:3000/ko/login > /dev/null; then
+              echo "server up after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "server failed to start" >&2
+          exit 1
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            http://localhost:3000/ko/login
+            http://localhost:3000/manifest.json
+          configPath: ./.lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Comment Lighthouse summary
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = '.lighthouseci';
+            if (!fs.existsSync(path)) return;
+            const files = fs.readdirSync(path).filter((f) => f.startsWith('lhr-') && f.endsWith('.json'));
+            if (files.length === 0) return;
+            const lines = ['### Lighthouse CI', ''];
+            for (const f of files) {
+              const r = JSON.parse(fs.readFileSync(`${path}/${f}`, 'utf8'));
+              const url = r.finalUrl;
+              const c = r.categories || {};
+              const fmt = (k) => c[k] ? Math.round(c[k].score * 100) : 'n/a';
+              lines.push(`- ${url}`);
+              lines.push(`  - PWA **${fmt('pwa')}** · Performance ${fmt('performance')} · Accessibility ${fmt('accessibility')} · Best practices ${fmt('best-practices')} · SEO ${fmt('seo')}`);
+            }
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: lines.join('\n'),
+            });
