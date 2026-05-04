@@ -19,9 +19,13 @@ import type {
   KakaoMessageTemplate,
   KakaoTokenResponse,
   KakaoUserInfoResponse,
+  KakaoDecryptedTokens,
   NotificationSettingsRow,
   SendKakaoResult,
 } from '@/types/kakao'
+import { createAdminClient } from '@/lib/supabase'
+import { getKakaoTokens, setKakaoTokens } from '@/lib/kakao-tokens'
+import { logSecurityEvent } from '@/lib/security-log'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SB = SupabaseClient<Database, any, any, any>
@@ -214,14 +218,17 @@ export function buildEventMessage(
 // DB 헬퍼 — public.notification_settings
 // ============================================================
 
-/** 사용자의 notification_settings 행 조회. 없으면 null. */
+/**
+ * 사용자의 notification_settings 메타데이터 조회 (토큰 제외).
+ * enabled_events / kakao_user_id 만 필요한 호출 측을 위해 RLS 적용 anon SB 도 허용한다.
+ */
 export async function getNotificationSettings(
   supabase: SB,
   userId: string
 ): Promise<NotificationSettingsRow | null> {
   const { data, error } = await supabase
     .from('notification_settings')
-    .select('*')
+    .select('id, user_id, kakao_access_token_enc, kakao_refresh_token_enc, kakao_user_id, enabled_events, created_at')
     .eq('user_id', userId)
     .maybeSingle()
   if (error) throw new KakaoError(`notification_settings 조회 실패: ${error.message}`, 500)
@@ -231,6 +238,10 @@ export async function getNotificationSettings(
 /**
  * 이벤트 활성화 여부 확인 후 카카오 메시지 발송.
  * access_token 만료(401) 시 refresh_token으로 자동 재발급한다.
+ *
+ * 토큰은 pgcrypto-encrypted 컬럼에 저장되어 있으므로 service-role admin client 로
+ * kakao_get_tokens / kakao_set_tokens RPC 를 통해서만 다룬다.
+ * 인자 supabase 는 enabled_events 같은 비밀이 아닌 메타데이터 조회에만 쓴다.
  */
 export async function notifyKakaoEvent(
   supabase: SB,
@@ -239,7 +250,7 @@ export async function notifyKakaoEvent(
   contextData?: string
 ): Promise<SendKakaoResult> {
   const settings = await getNotificationSettings(supabase, userId)
-  if (!settings?.kakao_access_token) {
+  if (!settings) {
     return { sent: false, error: '카카오 연동 안됨' }
   }
 
@@ -248,22 +259,32 @@ export async function notifyKakaoEvent(
     return { sent: false, error: `이벤트 '${event}' 비활성화됨` }
   }
 
+  const admin = createAdminClient()
+  let decrypted: KakaoDecryptedTokens | null
+  try {
+    decrypted = await getKakaoTokens(admin, userId)
+  } catch (err) {
+    return { sent: false, error: err instanceof Error ? err.message : '토큰 조회 실패' }
+  }
+  if (!decrypted?.access_token) {
+    return { sent: false, error: '카카오 연동 안됨' }
+  }
+
   const message = buildEventMessage(event, contextData)
-  let token = settings.kakao_access_token
+  let token = decrypted.access_token
   let result = await sendKakaoMessage(token, message)
 
   // 401 → refresh_token으로 재발급 후 재시도
-  if (!result.sent && result.error?.includes('401') && settings.kakao_refresh_token) {
+  if (!result.sent && result.error?.includes('401') && decrypted.refresh_token) {
     try {
-      const refreshed = await refreshAccessToken(settings.kakao_refresh_token)
+      const refreshed = await refreshAccessToken(decrypted.refresh_token)
       token = refreshed.access_token
-      await supabase
-        .from('notification_settings')
-        .update({
-          kakao_access_token: refreshed.access_token,
-          ...(refreshed.refresh_token ? { kakao_refresh_token: refreshed.refresh_token } : {}),
-        })
-        .eq('user_id', userId)
+      await setKakaoTokens(admin, userId, {
+        access: refreshed.access_token,
+        refresh: refreshed.refresh_token ?? null,
+        kakaoUserId: null, // 변경 없음 — RPC 가 coalesce 로 보존
+      })
+      logSecurityEvent({ tag: 'kakao_token', event: 'refresh', user_id: userId })
       result = await sendKakaoMessage(token, message)
     } catch {
       return { sent: false, error: '토큰 갱신 실패' }

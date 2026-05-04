@@ -86,21 +86,11 @@ export default function NotificationsPage() {
     if (!confirm(t('confirmUnlink'))) return
     setSaving(true)
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (!user) throw new Error(t('authRequired'))
-
-      const { error } = await supabase
-        .from('notification_settings')
-        .update({
-          kakao_access_token: null,
-          kakao_refresh_token: null,
-          kakao_user_id: null,
-        } as never)
-        .eq('user_id', user.id)
-
-      if (error) throw new Error(error.message)
+      const res = await fetch('/api/notifications/kakao/connect', { method: 'DELETE' })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string }
+        throw new Error(body.error ?? t('unlinkFailed'))
+      }
 
       setStatus((prev) =>
         prev ? { ...prev, connected: false, kakao_user_id: null } : null
