@@ -996,6 +996,72 @@ export type Database = {
         }
         Relationships: []
       }
+      student_weekly_reports: {
+        Row: {
+          id: string
+          student_id: string
+          class_id: string
+          week_start: string
+          metrics: Json
+          suggestions: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          class_id: string
+          week_start: string
+          metrics?: Json
+          suggestions?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          class_id?: string
+          week_start?: string
+          metrics?: Json
+          suggestions?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
+      in_app_notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          title: string
+          body: string
+          link_url: string | null
+          payload: Json
+          read_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          title: string
+          body?: string
+          link_url?: string | null
+          payload?: Json
+          read_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          title?: string
+          body?: string
+          link_url?: string | null
+          payload?: Json
+          read_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       professor_reports_latest: {
