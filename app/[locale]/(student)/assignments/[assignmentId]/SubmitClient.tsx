@@ -61,7 +61,7 @@ export default function SubmitClient({
         { kind: "submit", label: `과제 제출 — ${assignment.id}` }
       );
       if (isQueuedSentinel(res)) {
-        setError("오프라인 — 연결되면 자동으로 다시 제출합니다.");
+        setError(t("offlineQueued"));
         return;
       }
       const json = await res.json();

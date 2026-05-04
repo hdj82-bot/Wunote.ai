@@ -97,6 +97,7 @@
         "analysisResult": "분석 결과",
         "editAgain": "수정하기 →",
         "analyzeFailedDefault": "분석 요청에 실패했습니다.",
+        "offlineQueued": "오프라인 — 연결되면 자동으로 다시 분석합니다.",
         "unknownError": "알 수 없는 오류가 발생했습니다.",
         "tabDoc": "문서",
         "tabErrors": "오류",
@@ -370,6 +371,7 @@
         "draftAriaLabel": "중국어 문장 입력",
         "confirmResubmit": "이미 제출한 과제입니다. 다시 제출하면 기존 기록이 갱신됩니다. 계속할까요?",
         "submitFailed": "제출 실패",
+        "offlineQueued": "오프라인 — 연결되면 자동으로 다시 제출합니다.",
         "rubricTitle": "루브릭 채점",
         "colCriterion": "항목",
         "colScore": "점수",
@@ -822,6 +824,12 @@
         "analyzing": "분석 중…",
         "submit": "재진단",
         "ariaLabel": "중국어 문장 입력"
+      },
+      "offlineQueue": {
+        "queued": "오프라인 — {count}건 대기 중. 연결되면 자동 전송됩니다.",
+        "syncing": "대기 중인 요청을 전송 중…",
+        "synced": "{count}건이 성공적으로 전송되었습니다.",
+        "failed": "{count}건 전송 실패. 다시 시도하겠습니다."
       }
     }
   }

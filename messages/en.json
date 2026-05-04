@@ -97,6 +97,7 @@
         "analysisResult": "Analysis result",
         "editAgain": "Edit →",
         "analyzeFailedDefault": "Analysis request failed.",
+        "offlineQueued": "Offline — we'll re-analyze automatically once you're back online.",
         "unknownError": "An unknown error occurred.",
         "tabDoc": "Doc",
         "tabErrors": "Errors",
@@ -370,6 +371,7 @@
         "draftAriaLabel": "Chinese text input",
         "confirmResubmit": "You have already submitted this assignment. Resubmitting will overwrite your previous record. Continue?",
         "submitFailed": "Submission failed",
+        "offlineQueued": "Offline — we'll resubmit automatically once you're back online.",
         "rubricTitle": "Rubric scoring",
         "colCriterion": "Criterion",
         "colScore": "Score",
@@ -822,6 +824,12 @@
         "analyzing": "Analyzing…",
         "submit": "Re-analyze",
         "ariaLabel": "Chinese sentence input"
+      },
+      "offlineQueue": {
+        "queued": "Offline — {count} request(s) waiting. They'll be sent automatically when you reconnect.",
+        "syncing": "Sending queued requests…",
+        "synced": "{count} request(s) sent successfully.",
+        "failed": "{count} request(s) failed. We'll retry."
       }
     }
   }
