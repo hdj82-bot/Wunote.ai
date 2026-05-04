@@ -18,7 +18,10 @@
       "portfolio": "Portfolio",
       "peerReview": "Peer Review",
       "pronunciation": "Pronunciation",
-      "notifications": "Notifications",
+      "live": "Live class",
+      "weeklySuggestions": "Weekly suggestions",
+      "inbox": "Inbox",
+      "notifications": "Notification settings",
       "dataExport": "Export Data",
       "urlAnalyze": "URL Analysis",
       "settings": "Settings",
@@ -28,8 +31,10 @@
     "professor": {
       "dashboard": "Dashboard",
       "classes": "Classes",
+      "live": "Live class",
       "marketplace": "Marketplace",
       "reports": "Reports",
+      "inbox": "Inbox",
       "settings": "Settings",
       "dataExport": "Export Data",
       "apiKeys": "API Keys"

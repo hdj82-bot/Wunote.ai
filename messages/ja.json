@@ -18,6 +18,9 @@
       "portfolio": "ポートフォリオ",
       "peerReview": "ピアレビュー",
       "pronunciation": "発音練習",
+      "live": "ライブ授業",
+      "weeklySuggestions": "週次提案",
+      "inbox": "通知ボックス",
       "notifications": "通知設定",
       "dataExport": "データ書き出し",
       "urlAnalyze": "URL 分析",
@@ -28,8 +31,10 @@
     "professor": {
       "dashboard": "ダッシュボード",
       "classes": "授業管理",
+      "live": "ライブ授業",
       "marketplace": "マーケットプレイス",
       "reports": "レポート",
+      "inbox": "通知ボックス",
       "settings": "設定",
       "dataExport": "データ書き出し",
       "apiKeys": "APIキー"

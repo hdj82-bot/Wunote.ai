@@ -60,7 +60,10 @@ type NavKey =
   | "portfolio"
   | "peerReview"
   | "pronunciation"
+  | "live"
+  | "weeklySuggestions"
   | "notifications"
+  | "inbox"
   | "dataExport"
   | "settings";
 
@@ -79,6 +82,9 @@ const NAV: Array<{ href: string; key: NavKey }> = [
   { href: "/portfolio", key: "portfolio" },
   { href: "/peer-review", key: "peerReview" },
   { href: "/pronunciation", key: "pronunciation" },
+  { href: "/live", key: "live" },
+  { href: "/weekly-suggestions", key: "weeklySuggestions" },
+  { href: "/notifications/inbox", key: "inbox" },
   { href: "/notifications", key: "notifications" },
   { href: "/data-export", key: "dataExport" },
   { href: "/settings", key: "settings" },
