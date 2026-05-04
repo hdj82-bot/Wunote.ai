@@ -4,7 +4,8 @@
 // 이 모듈은 server 전용. cron route 에서만 호출된다.
 // service-role(admin) Supabase 클라이언트로 호출되며 RLS 를 우회한다.
 
-import { completeJSON, MODEL_ID } from './claude'
+import { dispatchJSON } from './ai/dispatch'
+import { modelForTask } from './ai/router'
 import { extractFirstJsonObject } from './parser'
 import { FOSSILIZATION_THRESHOLD } from './fossilization'
 import { toWeekStart } from './professor-reports'
@@ -282,7 +283,8 @@ export async function generateStudentSuggestions(input: {
   metrics: StudentWeeklyMetrics
 }): Promise<StudentWeeklySuggestions> {
   const weekEnd = addDaysISO(input.weekStart, 7)
-  return completeJSON<StudentWeeklySuggestions>(
+  return dispatchJSON<StudentWeeklySuggestions>(
+    'professor-report',
     {
       system: STUDENT_SUGGESTION_SYSTEM,
       messages: [
@@ -292,7 +294,6 @@ export async function generateStudentSuggestions(input: {
         }
       ],
       maxTokens: 1500,
-      cacheSystem: true,
       thinking: false
     },
     parseSuggestions
@@ -392,4 +393,4 @@ export async function listStudentWeeklyReports(
 // 사용 모델 ID 노출 (관측·디버깅용)
 // ============================================================
 
-export const WEEKLY_REPORT_MODEL_ID = MODEL_ID
+export const WEEKLY_REPORT_MODEL_ID = modelForTask('professor-report')
