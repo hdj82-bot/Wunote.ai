@@ -860,6 +860,7 @@ export type Database = {
           kakao_refresh_token: string | null
           kakao_user_id: string | null
           enabled_events: Json
+          kakao_consecutive_failures: number
           created_at: string
         }
         Insert: {
@@ -869,6 +870,7 @@ export type Database = {
           kakao_refresh_token?: string | null
           kakao_user_id?: string | null
           enabled_events?: Json
+          kakao_consecutive_failures?: number
           created_at?: string
         }
         Update: {
@@ -878,6 +880,7 @@ export type Database = {
           kakao_refresh_token?: string | null
           kakao_user_id?: string | null
           enabled_events?: Json
+          kakao_consecutive_failures?: number
           created_at?: string
         }
         Relationships: []
@@ -1023,6 +1026,36 @@ export type Database = {
           metrics?: Json
           suggestions?: Json
           created_at?: string
+        }
+        Relationships: []
+      }
+      cron_runs: {
+        Row: {
+          id: string
+          name: string
+          started_at: string
+          finished_at: string | null
+          status: 'running' | 'success' | 'partial' | 'failed'
+          summary: Json
+          errors: Json
+        }
+        Insert: {
+          id?: string
+          name: string
+          started_at?: string
+          finished_at?: string | null
+          status?: 'running' | 'success' | 'partial' | 'failed'
+          summary?: Json
+          errors?: Json
+        }
+        Update: {
+          id?: string
+          name?: string
+          started_at?: string
+          finished_at?: string | null
+          status?: 'running' | 'success' | 'partial' | 'failed'
+          summary?: Json
+          errors?: Json
         }
         Relationships: []
       }

@@ -4,7 +4,8 @@
 // 이 모듈은 server 전용. cron route 에서만 호출된다.
 // service-role(admin) Supabase 클라이언트로 호출되며 RLS 를 우회한다.
 
-import { completeJSON, MODEL_ID } from './claude'
+import type Anthropic from '@anthropic-ai/sdk'
+import { complete, completeJSON, extractText, MODEL_ID } from './claude'
 import { extractFirstJsonObject } from './parser'
 import { FOSSILIZATION_THRESHOLD } from './fossilization'
 import { toWeekStart } from './professor-reports'
@@ -275,28 +276,41 @@ function buildSuggestionUserPrompt(input: {
   ].join('\n')
 }
 
+export interface GenerateStudentSuggestionsResult {
+  suggestions: StudentWeeklySuggestions
+  /** Anthropic SDK 의 message.usage. cron_runs.summary.tokens 합산용. null 가능. */
+  usage: Anthropic.Usage | null
+}
+
 export async function generateStudentSuggestions(input: {
   studentName: string
   className: string
   weekStart: string
   metrics: StudentWeeklyMetrics
-}): Promise<StudentWeeklySuggestions> {
+}): Promise<GenerateStudentSuggestionsResult> {
   const weekEnd = addDaysISO(input.weekStart, 7)
-  return completeJSON<StudentWeeklySuggestions>(
-    {
-      system: STUDENT_SUGGESTION_SYSTEM,
-      messages: [
-        {
-          role: 'user',
-          content: buildSuggestionUserPrompt({ ...input, weekEnd })
-        }
-      ],
-      maxTokens: 1500,
-      cacheSystem: true,
-      thinking: false
-    },
-    parseSuggestions
-  )
+  const opts = {
+    system: STUDENT_SUGGESTION_SYSTEM,
+    messages: [
+      {
+        role: 'user' as const,
+        content: buildSuggestionUserPrompt({ ...input, weekEnd })
+      }
+    ],
+    maxTokens: 1500,
+    cacheSystem: true as const,
+    thinking: false
+  }
+  const message = await complete(opts)
+  const raw = extractText(message)
+  let suggestions: StudentWeeklySuggestions
+  try {
+    suggestions = parseSuggestions(raw)
+  } catch {
+    // 1회 재시도 — completeJSON 의 retry 패턴과 동일.
+    suggestions = await completeJSON<StudentWeeklySuggestions>(opts, parseSuggestions)
+  }
+  return { suggestions, usage: message.usage ?? null }
 }
 
 // ============================================================

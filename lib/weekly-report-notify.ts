@@ -15,6 +15,9 @@ type SB = SupabaseClient<Database, any, any, any>
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://wunote.ai'
 
+/** 연속 실패가 이 임계 이상이면 카카오 발송을 스킵하고 인앱만 발송한다. */
+export const KAKAO_FAILURE_FALLBACK_THRESHOLD = 3
+
 export function buildWeeklyReportTemplate(input: {
   studentName: string
   headline: string
@@ -42,6 +45,7 @@ export async function notifyWeeklyReportKakao(
   userId: string,
   template: KakaoMessageTemplate
 ): Promise<SendKakaoResult> {
+  // notification_settings 에 kakao_consecutive_failures 컬럼이 추가됐다 (20260505_3 마이그레이션).
   const { data, error } = await supabase
     .from('notification_settings')
     .select('*')
@@ -50,9 +54,20 @@ export async function notifyWeeklyReportKakao(
   if (error) {
     return { sent: false, error: `notification_settings: ${error.message}` }
   }
-  const settings = data as NotificationSettingsRow | null
+  const settings = data as
+    | (NotificationSettingsRow & { kakao_consecutive_failures?: number | null })
+    | null
   if (!settings?.kakao_access_token) {
     return { sent: false, error: '카카오 연동 안됨' }
+  }
+
+  // 연속 실패 임계 도달 → 즉시 폴백 (kakao 발송 안함, 호출 측이 인앱만 처리하도록).
+  const consecutive = settings.kakao_consecutive_failures ?? 0
+  if (consecutive >= KAKAO_FAILURE_FALLBACK_THRESHOLD) {
+    return {
+      sent: false,
+      error: `kakao_fallback: ${consecutive}회 연속 실패로 카카오 발송 스킵`
+    }
   }
 
   let token = settings.kakao_access_token
@@ -73,7 +88,7 @@ export async function notifyWeeklyReportKakao(
         .eq('user_id', userId)
       result = await sendKakaoMessage(token, template)
     } catch (refreshErr) {
-      return {
+      result = {
         sent: false,
         error: `토큰 갱신 실패: ${
           refreshErr instanceof Error ? refreshErr.message : String(refreshErr)
@@ -81,6 +96,14 @@ export async function notifyWeeklyReportKakao(
       }
     }
   }
+
+  // 결과를 토대로 카운터 갱신. 성공 → 0 으로 리셋, 실패 → +1.
+  await supabase
+    .from('notification_settings')
+    .update({
+      kakao_consecutive_failures: result.sent ? 0 : consecutive + 1
+    })
+    .eq('user_id', userId)
 
   return result
 }
