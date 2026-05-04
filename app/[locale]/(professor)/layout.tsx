@@ -2,12 +2,22 @@ import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 
-type NavKey = 'dashboard' | 'classes' | 'reports' | 'marketplace' | 'dataExport' | 'apiKeys'
+type NavKey =
+  | 'dashboard'
+  | 'classes'
+  | 'live'
+  | 'reports'
+  | 'inbox'
+  | 'marketplace'
+  | 'dataExport'
+  | 'apiKeys'
 
 const NAV: Array<{ href: string; key: NavKey; fallback: string }> = [
   { href: '/dashboard', key: 'dashboard', fallback: '대시보드' },
   { href: '/classes', key: 'classes', fallback: '수업 관리' },
+  { href: '/live', key: 'live', fallback: '실시간 수업' },
   { href: '/reports', key: 'reports', fallback: '리포트' },
+  { href: '/notifications/inbox', key: 'inbox', fallback: '알림함' },
   { href: '/marketplace', key: 'marketplace', fallback: '마켓플레이스' },
   { href: '/reports/export', key: 'dataExport', fallback: '데이터 내보내기' },
   { href: '/settings/api-keys', key: 'apiKeys', fallback: 'API 키' },
